@@ -1,10 +1,15 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
+// Log de segurança (vai aparecer no log do Render para você conferir)
+if (!process.env.DB_PASSWORD) {
+    console.error("❌ ERRO CRÍTICO: A variável DB_PASSWORD não foi encontrada no Environment do Render!");
+}
+
 const pool = mysql.createPool({
     host: 'mysql-raizes-nordeste-raizes-nordeste-tcc.d.aivencloud.com',
     user: 'avnadmin',
-    password: process.env.DB_PASSWORD, // Usa a senha separada que você criou
+    password: String(process.env.DB_PASSWORD), // Forçamos a senha a ser tratada como texto
     database: 'defaultdb',
     port: 10083,
     ssl: {
@@ -14,7 +19,6 @@ const pool = mysql.createPool({
     connectionLimit: 10,
     queueLimit: 0
 });
-
 const initDatabase = async () => {
     try {
         const connection = await pool.getConnection();
