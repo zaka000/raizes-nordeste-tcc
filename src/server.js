@@ -47,4 +47,15 @@ app.listen(PORT, () => {
   
   // Chama a função que importamos lá em cima
   initDatabase();
+
+  app.listen(PORT, async () => {
+  console.log(`🚀 SERVIDOR ON NA PORTA: ${PORT}`);
+  try {
+    await initDatabase();
+    console.log("✅ Banco de dados inicializado com sucesso!");
+  } catch (err) {
+    console.error("❌ ERRO AO INICIAR BANCO:", err.message);
+    // Não deixa o processo morrer sem logar o erro
+  }
+});
 });
