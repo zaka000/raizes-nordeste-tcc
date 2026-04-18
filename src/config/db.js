@@ -69,14 +69,14 @@ const initDatabase = async () => {
 
         // 5. Tabela de Itens do Pedido (Para detalhamento da compra)
         await connection.query(`
-            CREATE TABLE IF NOT EXISTS itens_pedido (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                pedido_id INT,
-                produto_id INT,
-                quantidade INT,
-                preco_unitario DECIMAL(10,2),
-                FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE,
-                FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
+            CREATE TABLE IF NOT EXISTS estoque (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            unidade_id INT,
+            produto_id INT,
+            quantidade INT DEFAULT 0,
+            UNIQUE KEY unique_estoque (unidade_id, produto_id), -- ISSO IMPEDE A REPETIÇÃO
+            FOREIGN KEY (unidade_id) REFERENCES unidades(id) ON DELETE CASCADE,
+            FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
             )
         `);
 
