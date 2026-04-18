@@ -18,6 +18,7 @@ app.use(cors());
 app.use(express.json());
 
 // 1. CONFIGURAÇÃO DE ARQUIVOS ESTÁTICOS
+// Define que a raiz do projeto é a pasta pública para CSS, JS e Imagens
 app.use(express.static(path.join(__dirname, '../')));
 
 // 2. ROTAS DA API
@@ -28,14 +29,14 @@ app.use('/stock', stockRoutes);
 app.use('/orders', orderRoutes);
 app.use('/reports', reportRoutes);
 
-// 3. ROTA PRINCIPAL (INDEX)
+// 3. ROTA PRINCIPAL (ENTREGA O FRONTEND)
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../index.html'));
 });
 
-// 4. ROTA DE FALLBACK (CORREÇÃO PARA EXPRESS 5)
-// Usamos '(.*)' para que o Express 5 entenda que é um parâmetro curinga
-app.get('(.*)', (req, res) => {
+// 4. ROTA DE FALLBACK (SINTAXE OBRIGATÓRIA PARA EXPRESS 5)
+// O ':splat*' substitui o '*' antigo que está causando o erro nos seus logs
+app.get('/:splat*', (req, res) => {
     res.sendFile(path.join(__dirname, '../index.html'));
 });
 
