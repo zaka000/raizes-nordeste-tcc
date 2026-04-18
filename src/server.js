@@ -1,6 +1,7 @@
 require('dotenv').config(); 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 
 const userRoutes = require('./api/routes/userRoutes');
 const unitRoutes = require('./api/routes/unitRoutes');
@@ -13,6 +14,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, '../')));
 
 app.use('/users', userRoutes);
 app.use('/units', unitRoutes);
@@ -23,6 +25,10 @@ app.use('/reports', reportRoutes);
 
 app.get('/', (req, res) => {
   res.send('API Raízes do Nordeste Online! 🚀');
+});
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
