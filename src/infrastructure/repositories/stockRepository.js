@@ -23,16 +23,18 @@ const stockRepository = {
    
     updateStock: async (unidade_id, produto_id, quantidade) => {
         try {
-            const [result] = await pool.query(
-                'INSERT INTO estoque (unidade_id, produto_id, quantidade) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE quantidade = quantidade + ?', 
-                [unidade_id, produto_id, quantidade, quantidade]
-            );
+            const [result] = await pool.query(`
+                INSERT INTO estoque (unidade_id, produto_id, quantidade) 
+                VALUES (?, ?, ?) 
+                ON DUPLICATE KEY UPDATE quantidade = quantidade + VALUES(quantidade)
+            `, [unidade_id, produto_id, quantidade]);
+            
             return result;
         } catch (error) {
             console.error("Erro ao atualizar estoque:", error.message);
             throw error;
         }
-    } // <-- Aqui NÃO tem vírgula porque é a última função do objeto
+    }
 };
 
 module.exports = stockRepository;
