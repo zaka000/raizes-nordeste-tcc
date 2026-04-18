@@ -71,7 +71,9 @@ async function carregarTelaEstoque() {
         const tbody = document.getElementById('tabela-estoque-body');
         if (!tbody) return;
         
-        tbody.innerHTML = '';
+        // ESTA LINHA ABAIXO É O SEGREDO: ela limpa a tabela antes de desenhar a nova lista
+        tbody.innerHTML = ''; 
+
         estoque.forEach(item => {
             const corStatus = item.quantidade > 0 ? '#8ebf42' : '#ff4444';
             const statusTexto = item.quantidade > 0 ? 'Em estoque' : 'Esgotado';
