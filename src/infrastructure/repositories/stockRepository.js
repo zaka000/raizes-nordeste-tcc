@@ -1,36 +1,19 @@
-const db = require('../database/connection');
-
-const stockRepository = {
-    
-    findAllWithNames: async () => {
-        const [rows] = await db.query(`
+findAllWithNames: async () => {
+    try {
+        // Mudamos para buscar da tabela de PRODUTOS primeiro. 
+        // Se não tiver estoque, ele traz "0" em vez de sumir com o produto.
+        const [rows] = await pool.query(`
             SELECT 
+                p.id as produto_id, 
                 p.nome as produto_nome, 
-                e.quantidade, 
-                p.preco,
-                e.produto_id
-            FROM estoque e
-            JOIN produtos p ON e.produto_id = p.id
+                p.preco, 
+                COALESCE(s.quantidade, 0) as quantidade
+            FROM produtos p
+            LEFT JOIN estoque s ON p.id = s.produto_id
         `);
         return rows;
-    },
-
-    updateStock: async (unidade_id, produto_id, quantidade) => {
-        
-        const sql = `
-            INSERT INTO estoque (unidade_id, produto_id, quantidade) 
-            VALUES (?, ?, ?) 
-            ON DUPLICATE KEY UPDATE quantidade = quantidade + VALUES(quantidade)`;
-        await db.query(sql, [unidade_id, produto_id, quantidade]);
-    },
-
-    listByUnit: async (unidade_id) => {
-        const [rows] = await db.query(
-            'SELECT p.nome, e.quantidade FROM estoque e JOIN produtos p ON e.produto_id = p.id WHERE e.unidade_id = ?',
-            [unidade_id]
-        );
-        return rows;
+    } catch (error) {
+        console.error("Erro ao listar estoque:", error.message);
+        return [];
     }
-};
-
-module.exports = stockRepository;
+},
