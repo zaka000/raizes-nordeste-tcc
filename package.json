@@ -1,14 +1,15 @@
 {
-  "name": "projeto-raizes-nordeste",
+  "name": "raizes-nordeste-tcc",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Projeto TCC Raízes do Nordeste",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
@@ -21,5 +22,4 @@
   "devDependencies": {
     "nodemon": "^3.1.14"
   }
-  
 }
