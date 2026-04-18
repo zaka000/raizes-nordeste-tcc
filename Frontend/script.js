@@ -220,6 +220,7 @@ async function salvarNovoProduto() {
     const nome = document.getElementById('new-nome').value;
     const preco = document.getElementById('new-preco').value;
     const categoria = document.getElementById('new-categoria').value;
+    
     if (!nome || !preco) return alert("Preencha nome e preço!");
 
     try {
@@ -228,12 +229,18 @@ async function salvarNovoProduto() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nome, preco, categoria })
         });
+        
         if (response.ok) {
             alert("Produto cadastrado com sucesso! 🌵");
             fecharModal();
             carregarTelaEstoque();
+        } else {
+            // Se o servidor recusar, agora ele vai te avisar na tela!
+            const erro = await response.text();
+            alert(`Erro do Servidor: ${response.status} - ${erro}`);
         }
     } catch (error) {
+        alert("Erro de conexão: O frontend não conseguiu chegar na API.");
         console.error("Erro ao cadastrar:", error);
     }
 }
