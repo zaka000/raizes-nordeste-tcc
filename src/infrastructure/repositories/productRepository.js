@@ -1,36 +1,28 @@
-const db = require('../database/connection');
+// Adicionamos as chaves { pool } para pegar apenas a conexão do banco
+const { pool } = require('../../config/db');
 
 const productRepository = {
-    findAll: async () => {
-        const [rows] = await db.query('SELECT * FROM produtos');
-        return rows;
-    },
-    
     create: async (nome, preco, categoria) => {
-        const conn = await db.getConnection();
         try {
-            await conn.beginTransaction();
-
-            // 1. Cria o produto
-            const [result] = await conn.query(
-                'INSERT INTO produtos (nome, preco, categoria) VALUES (?, ?, ?)',
+            // Trocamos 'db.query' por 'pool.query'
+            const [result] = await pool.query(
+                'INSERT INTO produtos (nome, preco, categoria) VALUES (?, ?, ?)', 
                 [nome, preco, categoria]
             );
-            const produto_id = result.insertId;
-
-            // 2. Cria a entrada automática no estoque (Unidade 1, Qtd 0)
-            await conn.query(
-                'INSERT INTO estoque (unidade_id, produto_id, quantidade) VALUES (?, ?, ?)',
-                [1, produto_id, 0] 
-            );
-
-            await conn.commit();
             return result;
         } catch (error) {
-            await conn.rollback();
-            throw error;
-        } finally {
-            conn.release();
+            console.error("Erro ao inserir produto:", error.message);
+            throw error; // Lança o erro para o controller tratar
+        }
+    },
+    findAll: async () => {
+        try {
+            // Trocamos 'db.query' por 'pool.query'
+            const [rows] = await pool.query('SELECT * FROM produtos');
+            return rows;
+        } catch (error) {
+            console.error("Erro ao buscar produtos:", error.message);
+            return []; // Retorna lista vazia para não quebrar o frontend
         }
     }
 };
