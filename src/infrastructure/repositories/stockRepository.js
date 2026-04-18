@@ -16,4 +16,4 @@ findAllWithNames: async () => {
         console.error("Erro ao listar estoque:", error.message);
         return [];
     }
-},
+}
