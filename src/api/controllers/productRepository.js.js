@@ -1,6 +1,6 @@
 // IMPORTANTE: O caminho deve ser idêntico ao nome da pasta no seu VS Code/GitHub
 // Se a pasta for 'repositories' e o arquivo 'productRepository.js', mantenha assim:
-const productRepository = require('../repositories/productRepository');
+const productRepository = require('../repositories/productRepository.js');
 
 const productController = {
     // 1. Listar todos os produtos
