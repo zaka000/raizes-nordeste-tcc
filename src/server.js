@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
-// Importação das rotas (mantendo as suas)
+// Importação das rotas
 const userRoutes = require('./api/routes/userRoutes');
 const unitRoutes = require('./api/routes/unitRoutes');
 const productRoutes = require('./api/routes/productRoutes'); 
@@ -17,8 +17,8 @@ app.use(cors());
 app.use(express.json());
 
 // 1. AJUSTE DE ARQUIVOS ESTÁTICOS
-// Agora apontamos para a pasta 'frontend' que está um nível acima de 'src'
-app.use(express.static(path.join(__dirname, '../frontend')));
+// O nome da pasta deve ser EXATAMENTE 'Frontend' como está no seu repositório
+app.use(express.static(path.join(__dirname, '../Frontend')));
 
 // 2. ROTAS DA API
 app.use('/users', userRoutes);
@@ -28,17 +28,21 @@ app.use('/stock', stockRoutes);
 app.use('/orders', orderRoutes);
 app.use('/reports', reportRoutes);
 
-// 3. ROTA PRINCIPAL (APONTANDO PARA DENTRO DE FRONTEND)
+// 3. ROTA PRINCIPAL
 app.get('/', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../frontend/index.html'));
+    // Usamos path.resolve para garantir o caminho absoluto no servidor Linux
+    res.sendFile(path.resolve(__dirname, '../Frontend/index.html'));
 });
 
-// 4. ROTA DE FALLBACK
+// 4. ROTA DE FALLBACK (Para rotas de navegação do frontend)
 app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../frontend/index.html'));
+    res.sendFile(path.resolve(__dirname, '../Frontend/index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Servidor ON rodando na pasta frontend`);
+  console.log(`=========================================`);
+  console.log(`✅ Servidor ON acessando a pasta Frontend`);
+  console.log(`🚀 Porta: ${PORT}`);
+  console.log(`=========================================`);
 });
