@@ -12,10 +12,15 @@ const reportRoutes = require('./api/routes/reportRoutes');
 
 const app = express();
 
+// Configurações Iniciais
 app.use(cors());
 app.use(express.json());
+
+// 1. CONFIGURAÇÃO DE ARQUIVOS ESTÁTICOS
+// Isso garante que o navegador encontre suas pastas de CSS, JS e Imagens
 app.use(express.static(path.join(__dirname, '../')));
 
+// 2. ROTAS DA API
 app.use('/users', userRoutes);
 app.use('/units', unitRoutes);
 app.use('/products', productRoutes); 
@@ -23,11 +28,14 @@ app.use('/stock', stockRoutes);
 app.use('/orders', orderRoutes);
 app.use('/reports', reportRoutes);
 
+// 3. ROTA PRINCIPAL (FRONTEND)
+// Removi o res.send que travava a página. Agora ele entrega o seu index.html
 app.get('/', (req, res) => {
-  res.send('API Raízes do Nordeste Online! 🚀');
+    res.sendFile(path.join(__dirname, '../index.html'));
 });
 
-app.get('/', (req, res) => {
+// 4. ROTA DE FALLBACK (Para evitar erros 404 ao atualizar a página)
+app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../index.html'));
 });
 
@@ -36,5 +44,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`=========================================`);
   console.log(`✅ Servidor rodando na porta ${PORT}`);
+  console.log(`🚀 Link: https://raizes-nordeste-tcc.onrender.com`);
   console.log(`=========================================`);
 });
