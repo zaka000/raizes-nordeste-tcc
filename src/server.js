@@ -18,7 +18,6 @@ app.use(cors());
 app.use(express.json());
 
 // 1. CONFIGURAÇÃO DE ARQUIVOS ESTÁTICOS
-// Define que a raiz do projeto (onde está o index.html) é a pasta pública
 app.use(express.static(path.join(__dirname, '../')));
 
 // 2. ROTAS DA API
@@ -29,13 +28,14 @@ app.use('/stock', stockRoutes);
 app.use('/orders', orderRoutes);
 app.use('/reports', reportRoutes);
 
-
+// 3. ROTA PRINCIPAL (INDEX)
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../index.html'));
 });
 
-
-app.get('/*', (req, res) => {
+// 4. ROTA DE FALLBACK (CORREÇÃO PARA EXPRESS 5)
+// Usamos '(.*)' para que o Express 5 entenda que é um parâmetro curinga
+app.get('(.*)', (req, res) => {
     res.sendFile(path.join(__dirname, '../index.html'));
 });
 
