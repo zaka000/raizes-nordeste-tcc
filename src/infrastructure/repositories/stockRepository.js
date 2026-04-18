@@ -1,7 +1,7 @@
 const { pool } = require('../../config/db');
 
 const stockRepository = {
-    // 1. Função de Listagem (Agora com LEFT JOIN para aparecer tudo)
+    // 1. Função de Listagem (Agrupada para não repetir nomes)
     findAllWithNames: async () => {
         try {
             const [rows] = await pool.query(`
@@ -9,18 +9,19 @@ const stockRepository = {
                     p.id as produto_id, 
                     p.nome as produto_nome, 
                     p.preco, 
-                    COALESCE(s.quantidade, 0) as quantidade
+                    SUM(COALESCE(s.quantidade, 0)) as quantidade
                 FROM produtos p
                 LEFT JOIN estoque s ON p.id = s.produto_id
+                GROUP BY p.id, p.nome, p.preco
             `);
             return rows;
         } catch (error) {
             console.error("Erro ao listar estoque:", error.message);
             return [];
         }
-    }, // <-- Essa vírgula separa uma função da outra dentro do objeto
+    }, // <-- ESSA VÍRGULA É OBRIGATÓRIA AQUI
 
-   
+    // 2. Função de Atualização (Soma em vez de criar novo registro)
     updateStock: async (unidade_id, produto_id, quantidade) => {
         try {
             const [result] = await pool.query(`
