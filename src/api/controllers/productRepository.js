@@ -1,5 +1,5 @@
 // Importando o repository com a extensão .js
-const productRepository = require('../repositories/productRepository.js');
+const productRepository = require('../repositories/productRepository');
 
 const productController = {
     findAll: async (req, res) => {
