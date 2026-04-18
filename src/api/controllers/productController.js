@@ -1,26 +1,43 @@
-const productRepository = require('../../infrastructure/repositories/productRepository');
 
-const productController = {
-    // Verifique se o nome aqui é 'register'
-    register: async (req, res) => {
+const { pool } = require('../../config/db');
+
+const productRepository = {
+    
+    create: async (nome, preco, categoria) => {
         try {
-            const { nome, preco, categoria } = req.body;
-            await productRepository.create(nome, preco, categoria);
-            res.status(201).json({ message: "Produto cadastrado com sucesso!" });
+            const [result] = await pool.query(
+                'INSERT INTO produtos (nome, preco, categoria) VALUES (?, ?, ?)',
+                [nome, preco, categoria]
+            );
+            return result;
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            console.error("🚨 Erro no SQL de Produto (Create):", error.message);
+            throw error; 
         }
     },
     
-    list: async (req, res) => {
+    
+    findAll: async () => {
         try {
-            const products = await productRepository.findAll();
-            res.json(products);
+            const [rows] = await pool.query('SELECT * FROM produtos ORDER BY id DESC');
+            return rows;
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            console.error("🚨 Erro no SQL de Produto (FindAll):", error.message);
+            return []; 
+        }
+    },
+
+   
+    delete: async (id) => {
+        try {
+            
+            const [result] = await pool.query('DELETE FROM produtos WHERE id = ?', [id]);
+            return result;
+        } catch (error) {
+            console.error("🚨 Erro no SQL de Produto (Delete):", error.message);
+            throw error;
         }
     }
 };
 
-// Certifique-se de que está exportando o objeto corretamente
-module.exports = productController;
+module.exports = productRepository;
