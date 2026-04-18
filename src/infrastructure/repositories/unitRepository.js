@@ -1,23 +1,13 @@
-const connection = require('../database/connection');
+const { pool } = require('../../config/db');
 
 const unitRepository = {
-    create: (nome, cidade) => {
-        return new Promise((resolve, reject) => {
-            const sql = 'INSERT INTO unidades (nome, cidade) VALUES (?, ?)';
-            connection.query(sql, [nome, cidade], (err, result) => {
-                if (err) reject(err);
-                resolve(result);
-            });
-        });
+    create: async (nome, cidade) => {
+        const [result] = await pool.query('INSERT INTO unidades (nome, cidade) VALUES (?, ?)', [nome, cidade]);
+        return result;
     },
-    findAll: () => {
-        return new Promise((resolve, reject) => {
-            connection.query('SELECT * FROM unidades', (err, results) => {
-                if (err) reject(err);
-                resolve(results);
-            });
-        });
+    findAll: async () => {
+        const [rows] = await pool.query('SELECT * FROM unidades');
+        return rows;
     }
 };
-
 module.exports = unitRepository;
