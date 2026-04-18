@@ -9,7 +9,7 @@ if (!process.env.DB_PASSWORD) {
 const pool = mysql.createPool({
     host: 'mysql-raizes-nordeste-raizes-nordeste-tcc.d.aivencloud.com',
     user: 'avnadmin',
-    password: process.env.DB_PASSWORD, // Use a senha nova: AVNS_SK5Jg8ZuduBTAyf-i1V
+    password: process.env.DB_PASSWORD,
     database: 'defaultdb',
     port: 10083,
     ssl: {
