@@ -1,8 +1,8 @@
-
 const { pool } = require('../../config/db');
 
 const productRepository = {
-   
+    
+    // 1. Criar Produto
     create: async (nome, preco, categoria) => {
         try {
             const [result] = await pool.query(
@@ -16,18 +16,27 @@ const productRepository = {
         }
     },
     
-    
+    // 2. Listar Todos
     findAll: async () => {
         try {
-            
             const [rows] = await pool.query('SELECT * FROM produtos ORDER BY id DESC');
             return rows;
         } catch (error) {
             console.error("🚨 Erro no SQL de Produto (FindAll):", error.message);
             return []; 
         }
+    }, // <-- Adicionei a vírgula aqui para separar as funções
+
+    // 3. Excluir Produto
+    delete: async (id) => {
+        try {
+            const [result] = await pool.query('DELETE FROM produtos WHERE id = ?', [id]);
+            return result;
+        } catch (error) {
+            console.error("🚨 Erro no SQL de Produto (Delete):", error.message);
+            throw error;
+        }
     }
 };
-
 
 module.exports = productRepository;
