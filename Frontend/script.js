@@ -1,4 +1,5 @@
-const API_URL = "http://127.0.0.1:3000";
+// const API_URL = "http://127.0.0.1:3000"; // Comente a local
+const API_URL = "https://raizes-backend.onrender.com"; // Coloque o link do Render
 let carrinho = [];
 
 // 1. Função principal para trocar de telas
