@@ -39,6 +39,12 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../index.html'));
 });
 
+app.get('/', (req, res) => {
+    const indexPath = path.join(__dirname, '../index.html');
+    console.log("Tentando servir o arquivo de:", indexPath); // Isso vai aparecer nos Logs do Render
+    res.sendFile(indexPath);
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
