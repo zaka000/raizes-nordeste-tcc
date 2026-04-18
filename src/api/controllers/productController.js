@@ -1,43 +1,44 @@
 
-const { pool } = require('../../config/db');
+const productRepository = require('../repositories/productRepository');
 
-const productRepository = {
-    
-    create: async (nome, preco, categoria) => {
+const productController = {
+    // Função para Listar
+    findAll: async (req, res) => {
         try {
-            const [result] = await pool.query(
-                'INSERT INTO produtos (nome, preco, categoria) VALUES (?, ?, ?)',
-                [nome, preco, categoria]
-            );
-            return result;
+            const products = await productRepository.findAll();
+            res.json(products);
         } catch (error) {
-            console.error("🚨 Erro no SQL de Produto (Create):", error.message);
-            throw error; 
-        }
-    },
-    
-    
-    findAll: async () => {
-        try {
-            const [rows] = await pool.query('SELECT * FROM produtos ORDER BY id DESC');
-            return rows;
-        } catch (error) {
-            console.error("🚨 Erro no SQL de Produto (FindAll):", error.message);
-            return []; 
+            res.status(500).json({ message: error.message });
         }
     },
 
-   
-    delete: async (id) => {
+    // Função para Criar (O erro deve estar aqui no nome!)
+    create: async (req, res) => {
         try {
+            const { nome, preco, categoria } = req.body;
+            await productRepository.create(nome, preco, categoria);
+            res.status(201).json({ message: "Produto criado com sucesso!" });
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    },
+
+    // Função para Deletar
+   delete: async (req, res) => {
+        try {
+            const { id } = req.params; // Isso pega o ID da rota /products/:id
+            const result = await productRepository.delete(id);
             
-            const [result] = await pool.query('DELETE FROM produtos WHERE id = ?', [id]);
-            return result;
+            if (result.affectedRows > 0) {
+                return res.json({ message: "Produto excluído com sucesso!" });
+            } else {
+                return res.status(404).json({ message: "Produto não encontrado." });
+            }
         } catch (error) {
-            console.error("🚨 Erro no SQL de Produto (Delete):", error.message);
-            throw error;
+            console.error("Erro no Controller (Delete):", error.message);
+            return res.status(500).json({ message: "Erro ao excluir: verifique dependências no banco." });
         }
     }
 };
 
-module.exports = productRepository;
+module.exports = productController;
