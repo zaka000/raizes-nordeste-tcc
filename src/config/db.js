@@ -1,34 +1,16 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-// Log para conferência no Render (Segurança: não logamos a senha)
-console.log(`🔌 Tentando conectar em: ${process.env.DB_HOST}:${process.env.DB_PORT}`);
-
-const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: parseInt(process.env.DB_PORT) || 10083,
-    ssl: {
-        rejectUnauthorized: false,
-        minVersion: 'TLSv1.2'
-    },
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-    connectTimeout: 60000, 
-    enableKeepAlive: true,
-    keepAliveInitialDelay: 10000
-    
-});
+// Agora usamos apenas a URL completa, que é mais estável
+const pool = mysql.createPool(process.env.DATABASE_URL + "?ssl-mode=REQUIRED");
 
 const initDatabase = async () => {
     try {
+        // Tentativa de conexão
         const connection = await pool.getConnection();
-        console.log("✅ Conectado ao banco do Aiven!");
+        console.log("✅ CONEXÃO ESTABELECIDA VIA URI COM SUCESSO!");
 
-        // Tabelas essenciais
+        // Tabelas
         const queries = [
             `CREATE TABLE IF NOT EXISTS usuarios (id INT AUTO_INCREMENT PRIMARY KEY, nome VARCHAR(255), email VARCHAR(255) UNIQUE, senha VARCHAR(255))`,
             `CREATE TABLE IF NOT EXISTS produtos (id INT AUTO_INCREMENT PRIMARY KEY, nome VARCHAR(255), preco DECIMAL(10,2), categoria VARCHAR(100))`,
@@ -42,18 +24,12 @@ const initDatabase = async () => {
             await connection.query(query);
         }
 
-        // Garantir que exista pelo menos uma unidade e um usuário para testes
-        await connection.query(`INSERT IGNORE INTO unidades (id, nome, cidade) VALUES (1, 'Matriz Nordeste', 'Recife')`);
-        await connection.query(`INSERT IGNORE INTO usuarios (id, nome, email, senha) VALUES (1, 'Admin', 'admin@raizes.com', '123456')`);
-
-        console.log("📂 Tabelas e dados iniciais verificados com sucesso!");
+        console.log("📂 Estrutura do banco pronta!");
         connection.release();
     } catch (error) {
-        console.error("❌ Erro fatal de conexão:", error.message);
-        console.error("Dica: Verifique se o IP 0.0.0.0/0 está liberado no Aiven.");
+        console.error("❌ Erro de conexão via URI:", error.message);
     }
 };
 
 initDatabase();
-
 module.exports = pool;
