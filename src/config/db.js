@@ -15,7 +15,6 @@ const pool = mysql.createPool({
     ssl: {
         rejectUnauthorized: false
     },
-    // Adicionamos estas configurações para maior estabilidade no método Native
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
@@ -26,29 +25,65 @@ const pool = mysql.createPool({
 const initDatabase = async () => {
     try {
         const connection = await pool.getConnection();
-        console.log("✅ AGORA FOI! CONEXÃO ESTABELECIDA COM SUCESSO!");
-        
-        // Criar tabelas caso não existam
+        console.log("🚀 CONEXÃO ESTABELECIDA E CRIANDO TABELAS...");
+
+        // 1. Tabela de Produtos
         await connection.query(`
             CREATE TABLE IF NOT EXISTS produtos (
                 id INT AUTO_INCREMENT PRIMARY KEY, 
-                nome VARCHAR(255), 
-                preco DECIMAL(10,2), 
+                nome VARCHAR(255) NOT NULL, 
+                preco DECIMAL(10,2) NOT NULL, 
                 categoria VARCHAR(100)
             )
         `);
-        
+
+        // 2. Tabela de Unidades (Essencial para o estoque aparecer!)
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS unidades (
+                id INT AUTO_INCREMENT PRIMARY KEY, 
+                nome VARCHAR(255) NOT NULL, 
+                cidade VARCHAR(255)
+            )
+        `);
+
+        // 3. Tabela de Estoque (Com chaves estrangeiras)
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS estoque (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                unidade_id INT,
+                produto_id INT,
+                quantidade INT DEFAULT 0,
+                FOREIGN KEY (unidade_id) REFERENCES unidades(id) ON DELETE CASCADE,
+                FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
+            )
+        `);
+
+        // 4. Tabela de Pedidos
         await connection.query(`
             CREATE TABLE IF NOT EXISTS pedidos (
                 id INT AUTO_INCREMENT PRIMARY KEY, 
-                total DECIMAL(10,2), 
+                total DECIMAL(10,2) NOT NULL, 
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
-        
+
+        // 5. Tabela de Itens do Pedido (Para detalhamento da compra)
+        await connection.query(`
+            CREATE TABLE IF NOT EXISTS itens_pedido (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                pedido_id INT,
+                produto_id INT,
+                quantidade INT,
+                preco_unitario DECIMAL(10,2),
+                FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE,
+                FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
+            )
+        `);
+
+        console.log("✅ TODAS AS TABELAS ESTÃO PRONTAS!");
         connection.release();
     } catch (error) {
-        console.error("❌ ERRO NO BANCO DE DADOS:", error.message);
+        console.error("❌ ERRO AO INICIALIZAR BANCO:", error.message);
     }
 };
 
