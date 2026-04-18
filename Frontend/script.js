@@ -9,7 +9,6 @@ function showSection(section) {
     const relatorios = document.getElementById('section-relatorios'); 
     const title = document.getElementById('main-title');
 
-    // Esconde todas as seções (usando verificação para não dar erro se o elemento não existir)
     if (dash) dash.style.display = 'none';
     if (vendas) vendas.style.display = 'none';
     if (estoque) estoque.style.display = 'none';
@@ -41,7 +40,6 @@ async function atualizarDashboard() {
         if (!response.ok) throw new Error("Erro na API");
         
         const data = await response.json();
-        
         const fatElement = document.getElementById('faturamento');
         const pedElement = document.getElementById('qtd-pedidos');
         const statusServer = document.getElementById('status-server');
@@ -57,7 +55,7 @@ async function atualizarDashboard() {
         console.error("Erro no dashboard:", error);
         const statusServer = document.getElementById('status-server');
         if (statusServer) {
-            statusServer.innerText = "○ API Offline (Banco de Dados não conectado)";
+            statusServer.innerText = "○ API Offline";
             statusServer.style.color = "#ff4444";
         }
     }
@@ -71,7 +69,6 @@ async function carregarTelaEstoque() {
         const tbody = document.getElementById('tabela-estoque-body');
         if (!tbody) return;
         
-        // ESTA LINHA ABAIXO É O SEGREDO: ela limpa a tabela antes de desenhar a nova lista
         tbody.innerHTML = ''; 
 
         estoque.forEach(item => {
@@ -79,19 +76,14 @@ async function carregarTelaEstoque() {
             const statusTexto = item.quantidade > 0 ? 'Em estoque' : 'Esgotado';
 
             tbody.innerHTML += `
-                <tr style="border-bottom: 1px solid #333;">
-                    <td style="padding: 12px;">${item.produto_nome}</td>
+                <tr>
+                    <td>${item.produto_nome}</td>
                     <td style="text-align: center; font-weight: bold; color: ${corStatus}">${item.quantidade}</td>
                     <td style="text-align: right;">R$ ${Number(item.preco).toFixed(2)}</td>
-                    <td style="text-align: center;">
-                        <span style="color: ${corStatus}">${statusTexto}</span>
-                    </td>
-                    <td style="text-align: center;">
-                        <button class="btn-secundario" 
-                                style="padding: 5px 10px; font-size: 12px; margin: 0;" 
-                                onclick="abrirModalEstoque(${item.produto_id}, '${item.produto_nome}')">
-                            + Add
-                        </button>
+                    <td style="text-align: center; color: ${corStatus}">${statusTexto}</td>
+                    <td style="text-align: center; display: flex; gap: 8px; justify-content: center;">
+                        <button class="btn-secundario" onclick="abrirModalEstoque(${item.produto_id}, '${item.produto_nome}')">+ Add</button>
+                        <button class="btn-excluir" onclick="excluirProduto(${item.produto_id})">🗑️</button>
                     </td>
                 </tr>
             `;
@@ -101,7 +93,28 @@ async function carregarTelaEstoque() {
     }
 }
 
-// Funções de Histórico de Vendas
+// FUNÇÃO NOVA: Excluir Produto
+async function excluirProduto(id) {
+    if (!confirm("Tem certeza que deseja excluir este produto? Isso removerá o estoque e o histórico vinculado.")) return;
+
+    try {
+        const response = await fetch(`${API_URL}/products/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            alert("Produto removido com sucesso! 🌵");
+            await carregarTelaEstoque();
+        } else {
+            alert("Não foi possível excluir o produto.");
+        }
+    } catch (error) {
+        console.error("Erro na exclusão:", error);
+        alert("Erro de conexão com o servidor.");
+    }
+}
+
+// 4. Histórico de Vendas
 async function carregarHistoricoVendas() {
     try {
         const response = await fetch(`${API_URL}/orders`); 
@@ -116,14 +129,12 @@ async function carregarHistoricoVendas() {
             const dataFormatada = isNaN(dataObj) ? "Data Indisponível" : dataObj.toLocaleString('pt-BR');
 
             tbody.innerHTML += `
-                <tr style="border-bottom: 1px solid #333;">
-                    <td style="padding: 12px;">#${venda.id}</td>
+                <tr>
+                    <td>#${venda.id}</td>
                     <td>${dataFormatada}</td>
                     <td style="text-align: right; font-weight: bold; color: #8ebf42;">R$ ${Number(venda.total).toFixed(2)}</td>
                     <td style="text-align: center;">
-                        <button class="btn-secundario" style="padding: 5px 10px; font-size: 11px;" onclick="verDetalhesVenda(${venda.id})">
-                            Ver Detalhes
-                        </button>
+                        <button class="btn-secundario" onclick="verDetalhesVenda(${venda.id})">Ver Detalhes</button>
                     </td>
                 </tr>
             `;
@@ -133,11 +144,10 @@ async function carregarHistoricoVendas() {
     }
 }
 
+// 5. Modais e Processamentos
 async function verDetalhesVenda(pedidoId) {
     try {
         const response = await fetch(`${API_URL}/orders/${pedidoId}/items`);
-        if (!response.ok) throw new Error(`Erro na rota: ${response.status}`);
-
         const itens = await response.json();
         const lista = document.getElementById('lista-detalhes-itens');
         const totalSpan = document.getElementById('detalhe-total');
@@ -154,28 +164,21 @@ async function verDetalhesVenda(pedidoId) {
             somaTotal += subtotal;
             
             lista.innerHTML += `
-                <li style="padding:10px 0; border-bottom:1px solid #444; display:flex; justify-content:space-between; align-items:center;">
-                    <div style="display:flex; flex-direction:column;">
-                        <span style="font-weight:bold; color:#fff;">${nome}</span>
-                        <span style="font-size:12px; color:#aaa;">Qtd: ${item.quantidade} x R$ ${Number(item.preco_unitario).toFixed(2)}</span>
-                    </div>
-                    <span style="font-weight:bold; color:#8ebf42;">R$ ${subtotal.toFixed(2)}</span>
+                <li class="item-detalhe">
+                    <span><strong>${nome}</strong> (x${item.quantidade})</span>
+                    <span>R$ ${subtotal.toFixed(2)}</span>
                 </li>
             `;
         });
 
         if (totalSpan) totalSpan.innerText = `R$ ${somaTotal.toFixed(2)}`;
         document.getElementById('modal-detalhes').style.display = 'flex';
-
     } catch (error) {
-        console.error("Erro detalhado:", error);
-        alert("Não foi possível carregar os detalhes desta venda.");
+        console.error("Erro detalhes:", error);
     }
 }
 
-function fecharModalDetalhes() {
-    document.getElementById('modal-detalhes').style.display = 'none';
-}
+function fecharModalDetalhes() { document.getElementById('modal-detalhes').style.display = 'none'; }
 
 function abrirModalEstoque(id, nome) {
     document.getElementById('add-estoque-id').value = id;
@@ -184,22 +187,18 @@ function abrirModalEstoque(id, nome) {
     document.getElementById('modal-estoque').style.display = 'flex';
 }
 
-function fecharModalEstoque() {
-    document.getElementById('modal-estoque').style.display = 'none';
-}
+function fecharModalEstoque() { document.getElementById('modal-estoque').style.display = 'none'; }
 
 async function processarEntradaEstoque() {
     const produto_id = document.getElementById('add-estoque-id').value;
     const quantidade = document.getElementById('add-estoque-qtd').value;
     if (!quantidade || quantidade <= 0) return alert("Digite uma quantidade válida!");
 
-    const dados = { unidade_id: 1, produto_id: parseInt(produto_id), quantidade: parseInt(quantidade) };
-
     try {
         const response = await fetch(`${API_URL}/stock/add`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
+            body: JSON.stringify({ unidade_id: 1, produto_id: parseInt(produto_id), quantidade: parseInt(quantidade) })
         });
         if (response.ok) {
             fecharModalEstoque();
@@ -210,13 +209,8 @@ async function processarEntradaEstoque() {
     }
 }
 
-function abrirModalProduto() {
-    document.getElementById('modal-produto').style.display = 'flex';
-}
-
-function fecharModal() {
-    document.getElementById('modal-produto').style.display = 'none';
-}
+function abrirModalProduto() { document.getElementById('modal-produto').style.display = 'flex'; }
+function fecharModal() { document.getElementById('modal-produto').style.display = 'none'; }
 
 async function salvarNovoProduto() {
     const nome = document.getElementById('new-nome').value;
@@ -233,16 +227,11 @@ async function salvarNovoProduto() {
         });
         
         if (response.ok) {
-            alert("Produto cadastrado com sucesso! 🌵");
+            alert("Produto cadastrado! 🌵");
             fecharModal();
             carregarTelaEstoque();
-        } else {
-            // Se o servidor recusar, agora ele vai te avisar na tela!
-            const erro = await response.text();
-            alert(`Erro do Servidor: ${response.status} - ${erro}`);
         }
     } catch (error) {
-        alert("Erro de conexão: O frontend não conseguiu chegar na API.");
         console.error("Erro ao cadastrar:", error);
     }
 }
@@ -279,10 +268,9 @@ function renderizarCarrinho() {
     if (!lista) return;
     
     lista.innerHTML = carrinho.map((item, index) => `
-        <li style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; background: #262626; padding: 8px; border-radius: 5px;">
+        <li class="item-carrinho">
             <span>${item.qtd}x ${item.nome}</span>
-            <span style="color: #ff4444; cursor: pointer; font-weight: bold; padding: 0 10px;" 
-                  onclick="removerDoCarrinho(${index})">X</span>
+            <span class="remover-item" onclick="removerDoCarrinho(${index})">X</span>
         </li>
     `).join('');
 
@@ -321,7 +309,6 @@ async function finalizarVendaCompleta() {
     }
 }
 
-// INICIALIZAÇÃO SEGURA
 document.addEventListener('DOMContentLoaded', () => {
-    showSection('dash'); // Inicia na tela de dashboard
+    showSection('dash');
 });
