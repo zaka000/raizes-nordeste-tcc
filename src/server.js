@@ -29,15 +29,13 @@ app.use('/stock', stockRoutes);
 app.use('/orders', orderRoutes);
 app.use('/reports', reportRoutes);
 
-// 3. ROTA PRINCIPAL (ENTREGA O FRONTEND)
-// Removida qualquer outra rota '/' que enviava texto puro
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../index.html'));
 });
 
-// 4. ROTA DE FALLBACK (CORINGA)
-// Se o usuário tentar acessar qualquer link, ele carrega o index.html
-app.get('*', (req, res) => {
+
+app.get('/*', (req, res) => {
     res.sendFile(path.join(__dirname, '../index.html'));
 });
 
