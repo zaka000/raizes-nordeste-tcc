@@ -10,6 +10,8 @@ const productRoutes = require('./api/routes/productRoutes');
 const stockRoutes = require('./api/routes/stockRoutes');
 const orderRoutes = require('./api/routes/orderRoutes');
 const reportRoutes = require('./api/routes/reportRoutes');
+const { initDatabase } = require('./config/db');
+const PORT = process.env.PORT || 10000;
 
 const app = express();
 app.use(cors());
@@ -33,7 +35,10 @@ app.get('*', (req, res) => {
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor ON na porta ${PORT}`);
-    // Tenta conectar ao banco DEPOIS que o servidor já está no ar
-    initDatabase();
-});
+  console.log(`=========================================`);
+  console.log(`🚀 SERVIDOR ON NA PORTA: ${PORT}`);
+  console.log(`=========================================`);
+  
+  // Chama a conexão com o banco de forma independente
+  initDatabase();
+});;
