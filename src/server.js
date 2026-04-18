@@ -2,24 +2,29 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const { pool, initDatabase } = require('./config/db'); // Importação ajustada
 
+// IMPORTANTE: Importamos o initDatabase do arquivo de configuração do banco
+const { initDatabase } = require('./config/db'); 
+
+// Importação das rotas
 const userRoutes = require('./api/routes/userRoutes');
 const unitRoutes = require('./api/routes/unitRoutes');
 const productRoutes = require('./api/routes/productRoutes'); 
 const stockRoutes = require('./api/routes/stockRoutes');
 const orderRoutes = require('./api/routes/orderRoutes');
 const reportRoutes = require('./api/routes/reportRoutes');
-const { initDatabase } = require('./config/db');
-const PORT = process.env.PORT || 10000;
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
-// Servindo arquivos estáticos
-app.use(express.static(path.join(__dirname, '../Frontend')));
+// Servindo arquivos estáticos da pasta Frontend
+// Usamos path.join para evitar erros de caminho no Linux do Render
+const frontendPath = path.join(__dirname, '..', 'Frontend');
+app.use(express.static(frontendPath));
 
+// Rotas da API
 app.use('/users', userRoutes);
 app.use('/units', unitRoutes);
 app.use('/products', productRoutes); 
@@ -27,11 +32,12 @@ app.use('/stock', stockRoutes);
 app.use('/orders', orderRoutes);
 app.use('/reports', reportRoutes);
 
+// Rota para o Frontend (Single Page Application)
 app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../Frontend/index.html'));
+    res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
-// O Render usa portas variadas, 10000 é a padrão lá
+// Porta padrão do Render ou 10000
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
@@ -39,6 +45,6 @@ app.listen(PORT, () => {
   console.log(`🚀 SERVIDOR ON NA PORTA: ${PORT}`);
   console.log(`=========================================`);
   
-  // Chama a conexão com o banco de forma independente
+  // Chama a função que importamos lá em cima
   initDatabase();
-});;
+});
