@@ -5,17 +5,21 @@ const reportController = {
         try {
             const data = await reportRepository.getDashboardData();
             
-            // Se o repositório retornar null ou undefined por falta de dados
+            // DETETIVE: Mostra no terminal o que o banco respondeu pro dashboard
+            console.log("📊 [Dashboard] Dados recebidos do banco:", data);
+            
             if (!data) {
                 return res.json({ faturamento: 0, qtd_pedidos: 0 });
             }
 
-            res.json(data);
+            // Garante que os números vão para o frontend como números reais, não textos
+            res.json({
+                faturamento: Number(data.faturamento) || 0,
+                qtd_pedidos: Number(data.qtd_pedidos) || 0
+            });
         } catch (error) {
             console.error("🚨 Erro no Controller de Relatório:", error);
             
-            // Retornamos um objeto zerado em vez de erro 500 para o Dashboard não ficar "Offline"
-            // Mas enviamos o erro no console para você conseguir debugar no Render
             res.status(200).json({ 
                 faturamento: 0, 
                 qtd_pedidos: 0, 
