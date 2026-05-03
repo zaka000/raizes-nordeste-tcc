@@ -290,13 +290,27 @@ function removerDoCarrinho(index) {
 async function finalizarVendaCompleta() {
     if (carrinho.length === 0) return alert("Adicione itens ao carrinho primeiro!");
     
-    const totalVenda = document.getElementById('total-venda').innerText;
+    // Pegamos o texto do total e removemos qualquer coisa que não seja número ou ponto
+    const totalTexto = document.getElementById('total-venda').innerText;
+    const totalLimpo = parseFloat(totalTexto.replace(/[^\d.]/g, ''));
+
+    // Verificação de segurança para evitar o erro de 'NaN'
+    if (isNaN(totalLimpo)) {
+        return alert("Erro ao calcular o valor total. Verifique os itens do carrinho.");
+    }
+
     const dadosPedido = {
         usuario_id: 1, 
         unidade_id: 1,
-        total: parseFloat(totalVenda),
-        itens: carrinho 
+        total: totalLimpo,
+        itens: carrinho.map(item => ({
+            produto_id: parseInt(item.produto_id),
+            quantidade: parseInt(item.qtd),
+            preco_unitario: parseFloat(item.preco_unitario)
+        }))
     };
+
+    console.log("📤 Enviando pedido:", dadosPedido); // Log para conferir no console do navegador
 
     try {
         const response = await fetch(`${API_URL}/orders`, {
@@ -311,14 +325,13 @@ async function finalizarVendaCompleta() {
             alert("Venda Realizada com Sucesso! 🌵");
             carrinho = [];
             renderizarCarrinho();
-            showSection('dash'); // Volta para o início para ver o novo faturamento
+            showSection('dash');
         } else {
-            // Aqui ele vai mostrar o erro de "Estoque Insuficiente" que vem do servidor
             alert("Erro na venda: " + (resultado.message || "Tente novamente."));
         }
     } catch (error) {
         console.error("Erro ao finalizar venda:", error);
-        alert("Erro de conexão com o servidor. Verifique se a API está online.");
+        alert("Erro de conexão com o servidor.");
     }
 }
 
