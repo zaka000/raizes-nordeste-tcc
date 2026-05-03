@@ -147,7 +147,10 @@ async function carregarHistoricoVendas() {
 // 5. Modais e Processamentos
 async function verDetalhesVenda(pedidoId) {
     try {
-        const response = await fetch(`${API_URL}/orders/${pedidoId}/items`);
+        // Corrigido de /items para /itens/ID conforme seu orderRoutes.js
+        const response = await fetch(`${API_URL}/orders/itens/${pedidoId}`);
+        if (!response.ok) throw new Error("Erro ao buscar detalhes");
+        
         const itens = await response.json();
         const lista = document.getElementById('lista-detalhes-itens');
         const totalSpan = document.getElementById('detalhe-total');
@@ -159,12 +162,12 @@ async function verDetalhesVenda(pedidoId) {
         let somaTotal = 0;
 
         itens.forEach(item => {
-            const nome = item.produto || item.produto_nome || "Produto";
+            const nome = item.produto_nome || "Produto";
             const subtotal = item.quantidade * item.preco_unitario;
             somaTotal += subtotal;
             
             lista.innerHTML += `
-                <li class="item-detalhe">
+                <li class="item-detalhe" style="display:flex; justify-content:space-between; margin-bottom:10px;">
                     <span><strong>${nome}</strong> (x${item.quantidade})</span>
                     <span>R$ ${subtotal.toFixed(2)}</span>
                 </li>
@@ -175,6 +178,7 @@ async function verDetalhesVenda(pedidoId) {
         document.getElementById('modal-detalhes').style.display = 'flex';
     } catch (error) {
         console.error("Erro detalhes:", error);
+        alert("Não foi possível carregar os detalhes deste pedido.");
     }
 }
 
@@ -284,7 +288,8 @@ function removerDoCarrinho(index) {
 }
 
 async function finalizarVendaCompleta() {
-    if (carrinho.length === 0) return alert("Adicione itens!");
+    if (carrinho.length === 0) return alert("Adicione itens ao carrinho primeiro!");
+    
     const totalVenda = document.getElementById('total-venda').innerText;
     const dadosPedido = {
         usuario_id: 1, 
@@ -292,20 +297,28 @@ async function finalizarVendaCompleta() {
         total: parseFloat(totalVenda),
         itens: carrinho 
     };
+
     try {
         const response = await fetch(`${API_URL}/orders`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dadosPedido)
         });
+
+        const resultado = await response.json();
+
         if (response.ok) {
-            alert("Venda Realizada!");
+            alert("Venda Realizada com Sucesso! 🌵");
             carrinho = [];
             renderizarCarrinho();
-            showSection('dash');
+            showSection('dash'); // Volta para o início para ver o novo faturamento
+        } else {
+            // Aqui ele vai mostrar o erro de "Estoque Insuficiente" que vem do servidor
+            alert("Erro na venda: " + (resultado.message || "Tente novamente."));
         }
     } catch (error) {
-        alert("Erro ao finalizar venda.");
+        console.error("Erro ao finalizar venda:", error);
+        alert("Erro de conexão com o servidor. Verifique se a API está online.");
     }
 }
 
