@@ -1,7 +1,6 @@
 const { pool } = require('../../config/db');
 
 const stockRepository = {
-    // 1. Função de Listagem (Agrupada para não repetir nomes)
     findAllWithNames: async () => {
         try {
             const [rows] = await pool.query(`
@@ -19,17 +18,18 @@ const stockRepository = {
             console.error("Erro ao listar estoque:", error.message);
             return [];
         }
-    }, // <-- ESSA VÍRGULA É OBRIGATÓRIA AQUI
+    },
 
-    // 2. Função de Atualização (Soma em vez de criar novo registro)
+  
     updateStock: async (unidade_id, produto_id, quantidade) => {
         try {
-            const [result] = await pool.query(`
+            
+            const sql = `
                 INSERT INTO estoque (unidade_id, produto_id, quantidade) 
                 VALUES (?, ?, ?) 
                 ON DUPLICATE KEY UPDATE quantidade = quantidade + VALUES(quantidade)
-            `, [unidade_id, produto_id, quantidade]);
-            
+            `;
+            const [result] = await pool.query(sql, [unidade_id, produto_id, quantidade]);
             return result;
         } catch (error) {
             console.error("Erro ao atualizar estoque:", error.message);
