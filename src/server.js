@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
-// IMPORTANTE: Importamos o initDatabase do arquivo de configuração do banco
+// Importamos o initDatabase
 const { initDatabase } = require('./config/db'); 
 
 // Importação das rotas
@@ -19,8 +19,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Servindo arquivos estáticos da pasta Frontend
-// Usamos path.join para evitar erros de caminho no Linux do Render
+// Servindo arquivos estáticos
 const frontendPath = path.join(__dirname, '..', 'Frontend');
 app.use(express.static(frontendPath));
 
@@ -32,30 +31,25 @@ app.use('/stock', stockRoutes);
 app.use('/orders', orderRoutes);
 app.use('/reports', reportRoutes);
 
-// Rota para o Frontend (Single Page Application)
+// Rota para o Frontend
 app.get('*', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
-// Porta padrão do Render ou 10000
-const PORT = process.env.PORT || 10000;
+// Porta padrão
+const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+// LIGANDO O SERVIDOR APENAS UMA VEZ
+app.listen(PORT, async () => {
   console.log(`=========================================`);
   console.log(`🚀 SERVIDOR ON NA PORTA: ${PORT}`);
   console.log(`=========================================`);
   
-  // Chama a função que importamos lá em cima
-  initDatabase();
-
-  app.listen(PORT, async () => {
-  console.log(`🚀 SERVIDOR ON NA PORTA: ${PORT}`);
   try {
+    // Inicializa o banco de dados do Aiven
     await initDatabase();
     console.log("✅ Banco de dados inicializado com sucesso!");
   } catch (err) {
     console.error("❌ ERRO AO INICIAR BANCO:", err.message);
-    // Não deixa o processo morrer sem logar o erro
   }
-});
 });
