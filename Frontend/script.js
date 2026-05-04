@@ -16,7 +16,7 @@ function showSection(section) {
 
     if (section === 'dash') {
         if (dash) dash.style.display = 'block';
-        if (title) title.innerText = "Bem-vindo, Bruno! 👋";
+        if (title) title.innerText = "Bem-vindo, Samuel! 👋";
         atualizarDashboard(); 
     } else if (section === 'vendas') {
         if (vendas) vendas.style.display = 'block';
