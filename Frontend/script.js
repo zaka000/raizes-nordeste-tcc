@@ -1,7 +1,7 @@
 const API_URL = "https://raizes-nordeste-tcc.onrender.com"; 
 let carrinho = [];
 
-// 1. Função principal para trocar de telas
+
 function showSection(section) {
     const dash = document.getElementById('section-dash');
     const vendas = document.getElementById('section-vendas');
@@ -33,7 +33,7 @@ function showSection(section) {
     }
 }
 
-// 2. Atualiza os números do Dashboard
+
 async function atualizarDashboard() {
     try {
         const response = await fetch(`${API_URL}/reports/dashboard`);
@@ -61,7 +61,7 @@ async function atualizarDashboard() {
     }
 }
 
-// 3. Funções de Estoque
+
 async function carregarTelaEstoque() {
     try {
         const response = await fetch(`${API_URL}/stock`);
@@ -92,26 +92,31 @@ async function carregarTelaEstoque() {
     }
 }
 
-// 4. Histórico de Vendas (Corrigido para evitar erro de JSON)
+
 async function carregarHistoricoVendas() {
     try {
         const response = await fetch(`${API_URL}/orders`);
-        if (!response.ok) throw new Error("Erro ao buscar histórico");
-        
         const vendas = await response.json();
         const tbody = document.getElementById('tabela-vendas-body');
         if (!tbody) return;
         
         tbody.innerHTML = '';
 
-        if (!vendas || vendas.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Nenhuma venda encontrada.</td></tr>';
-            return;
-        }
-
         vendas.forEach(venda => {
-            const dataBruta = venda.created_at || venda.data_pedido || venda.data || new Date();
-            const dataFormatada = new Date(dataBruta).toLocaleString('pt-BR');
+            // Se o banco retornar nulo, usamos o agora, mas o ideal é vir do banco
+            const dataBanco = venda.created_at || venda.data_pedido;
+            
+            // Forçamos a conversão para a data local do Brasil
+            const dataFormatada = new Date(dataBanco).toLocaleString('pt-BR', {
+                timeZone: 'America/Sao_Paulo',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
             const total = Number(venda.total || 0).toFixed(2);
 
             tbody.innerHTML += `
@@ -127,12 +132,10 @@ async function carregarHistoricoVendas() {
         });
     } catch (error) {
         console.error("Erro ao carregar histórico:", error);
-        const tbody = document.getElementById('tabela-vendas-body');
-        if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="color:red; text-align:center;">Erro ao conectar com a API de vendas.</td></tr>';
     }
 }
 
-// 5. Detalhes da Venda 
+
 async function verDetalhesVenda(pedidoId) {
     try {
         const response = await fetch(`${API_URL}/orders/itens/${pedidoId}`);
@@ -170,7 +173,7 @@ async function verDetalhesVenda(pedidoId) {
 
 function fecharModalDetalhes() { document.getElementById('modal-detalhes').style.display = 'none'; }
 
-// 6. Funções de Venda e Carrinho
+
 async function carregarProdutosNoSelect() {
     try {
         const response = await fetch(`${API_URL}/products`);
@@ -259,31 +262,43 @@ async function finalizarVendaCompleta() {
     }
 }
 
-// 7. Modais de Estoque
-function abrirModalEstoque(id, nome) {
-    document.getElementById('add-estoque-id').value = id;
-    document.getElementById('modal-estoque-titulo').innerText = `Abastecer: ${nome}`;
-    document.getElementById('modal-estoque').style.display = 'flex';
+
+function abrirModalProduto() {
+    document.getElementById('modal-produto').style.display = 'flex';
 }
 
-function fecharModalEstoque() { document.getElementById('modal-estoque').style.display = 'none'; }
+function fecharModal() {
+    document.getElementById('modal-produto').style.display = 'none';
+}
 
-async function processarEntradaEstoque() {
-    const produto_id = document.getElementById('add-estoque-id').value;
-    const quantidade = document.getElementById('add-estoque-qtd').value;
+async function salvarNovoProduto() {
+    const nome = document.getElementById('new-nome').value;
+    const preco = document.getElementById('new-preco').value;
+    const categoria = document.getElementById('new-categoria').value;
+
+    if (!nome || !preco) return alert("Preencha nome e preço!");
 
     try {
-        const response = await fetch(`${API_URL}/stock/add`, {
+        const response = await fetch(`${API_URL}/products`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ unidade_id: 1, produto_id: parseInt(produto_id), quantidade: parseInt(quantidade) })
+            body: JSON.stringify({ nome, preco: parseFloat(preco), categoria })
         });
+
         if (response.ok) {
-            fecharModalEstoque();
-            await carregarTelaEstoque();
+            alert("Produto cadastrado com sucesso! 🌵");
+            fecharModal();
+            // Limpa os campos
+            document.getElementById('new-nome').value = '';
+            document.getElementById('new-preco').value = '';
+            document.getElementById('new-categoria').value = '';
+            // Atualiza a tela de estoque se estiver nela
+            carregarTelaEstoque();
+        } else {
+            alert("Erro ao cadastrar produto.");
         }
     } catch (error) {
-        console.error("Erro estoque:", error);
+        console.error("Erro ao salvar produto:", error);
     }
 }
 
