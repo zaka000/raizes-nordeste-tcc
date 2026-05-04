@@ -93,27 +93,46 @@ async function carregarTelaEstoque() {
 // 4. Histórico de Vendas
 async function carregarHistoricoVendas() {
     try {
+        console.log("🔍 Buscando histórico em:", `${API_URL}/orders`);
         const response = await fetch(`${API_URL}/orders`);
+        
+        if (!response.ok) throw new Error("Erro ao buscar ordens");
+        
         const vendas = await response.json();
         const tbody = document.getElementById('tabela-vendas-body');
+        
         if (!tbody) return;
         tbody.innerHTML = '';
 
+        if (vendas.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Nenhuma venda encontrada.</td></tr>';
+            return;
+        }
+
         vendas.forEach(venda => {
-            const data = new Date(venda.created_at).toLocaleString('pt-BR');
+            // O segredo está aqui: tentamos ler 'created_at' ou 'data' ou 'data_pedido'
+            const dataRaw = venda.created_at || venda.data || venda.data_pedido;
+            const dataObj = new Date(dataRaw);
+            const dataFormatada = isNaN(dataObj) ? "Data Indisponível" : dataObj.toLocaleString('pt-BR');
+
+            // Garantimos que o total seja um número para o toFixed não quebrar
+            const valorTotal = Number(venda.total || 0).toFixed(2);
+
             tbody.innerHTML += `
                 <tr>
                     <td>#${venda.id}</td>
-                    <td>${data}</td>
-                    <td style="text-align: right; color: #8ebf42;">R$ ${Number(venda.total).toFixed(2)}</td>
+                    <td>${dataFormatada}</td>
+                    <td style="text-align: right; font-weight: bold; color: #8ebf42;">R$ ${valorTotal}</td>
                     <td style="text-align: center;">
-                        <button class="btn-secundario" onclick="verDetalhesVenda(${venda.id})">Detalhes</button>
+                        <button class="btn-secundario" onclick="verDetalhesVenda(${venda.id})">Ver Detalhes</button>
                     </td>
                 </tr>
             `;
         });
     } catch (error) {
-        console.error("Erro histórico:", error);
+        console.error("Erro ao carregar histórico:", error);
+        const tbody = document.getElementById('tabela-vendas-body');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="color:red; text-align:center;">Erro ao carregar dados.</td></tr>';
     }
 }
 
