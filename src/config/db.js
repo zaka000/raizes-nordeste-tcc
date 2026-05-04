@@ -1,7 +1,6 @@
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-// Log para conferência no Render
 if (!process.env.DB_PASSWORD) {
     console.error("❌ ERRO: A variável DB_PASSWORD não foi encontrada!");
 }
@@ -27,7 +26,6 @@ const initDatabase = async () => {
         const connection = await pool.getConnection();
         console.log("🚀 CONEXÃO ESTABELECIDA E CRIANDO TABELAS...");
 
-        // 1. Tabela de Produtos
         await connection.query(`
             CREATE TABLE IF NOT EXISTS produtos (
                 id INT AUTO_INCREMENT PRIMARY KEY, 
@@ -37,7 +35,6 @@ const initDatabase = async () => {
             )
         `);
 
-        // 2. Tabela de Unidades (Essencial para o estoque aparecer!)
         await connection.query(`
             CREATE TABLE IF NOT EXISTS unidades (
                 id INT AUTO_INCREMENT PRIMARY KEY, 
@@ -46,7 +43,6 @@ const initDatabase = async () => {
             )
         `);
 
-        // 3. Tabela de Estoque (Com chaves estrangeiras)
         await connection.query(`
             CREATE TABLE IF NOT EXISTS estoque (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -58,7 +54,6 @@ const initDatabase = async () => {
             )
         `);
 
-        // 4. Tabela de Pedidos
         await connection.query(`
             CREATE TABLE IF NOT EXISTS pedidos (
                 id INT AUTO_INCREMENT PRIMARY KEY, 
@@ -67,7 +62,6 @@ const initDatabase = async () => {
             )
         `);
 
-        // 5. Tabela de Itens do Pedido (Para detalhamento da compra)
         await connection.query(`
             CREATE TABLE IF NOT EXISTS estoque (
             id INT AUTO_INCREMENT PRIMARY KEY,

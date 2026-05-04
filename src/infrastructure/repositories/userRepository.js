@@ -2,7 +2,6 @@ const connection = require('../database/connection');
 const bcrypt = require('bcryptjs');
 
 const userRepository = {
-    // Cadastro com criptografia
     create: async (nome, email, senha) => {
         const salt = await bcrypt.genSalt(10);
         const senhaCripto = await bcrypt.hash(senha, salt);
@@ -12,7 +11,6 @@ const userRepository = {
         return result;
     },
 
-    // Buscar por e-mail (usaremos no Login)
     findByEmail: async (email) => {
         const sql = 'SELECT * FROM usuarios WHERE email = ?';
         const [rows] = await connection.query(sql, [email]);

@@ -132,7 +132,7 @@ async function carregarHistoricoVendas() {
     }
 }
 
-// 5. Detalhes da Venda (Modal)
+// 5. Detalhes da Venda 
 async function verDetalhesVenda(pedidoId) {
     try {
         const response = await fetch(`${API_URL}/orders/itens/${pedidoId}`);

@@ -1,7 +1,6 @@
 const stockRepository = require('../../infrastructure/repositories/stockRepository');
 
 const stockController = {
-    // ESSA É A FUNÇÃO QUE O SEU SITE ESTÁ CHAMANDO
     listAll: async (req, res) => {
         try {
             const stock = await stockRepository.findAllWithNames();

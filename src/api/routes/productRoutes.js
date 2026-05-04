@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 
-// Esse comando encontra o arquivo pelo caminho real no servidor, sem erro de ../
 const productController = require('../controllers/productController');
 
 router.get('/', productController.findAll);

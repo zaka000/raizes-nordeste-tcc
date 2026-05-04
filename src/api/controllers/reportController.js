@@ -5,14 +5,13 @@ const reportController = {
         try {
             const data = await reportRepository.getDashboardData();
             
-            // DETETIVE: Mostra no terminal o que o banco respondeu pro dashboard
             console.log("📊 [Dashboard] Dados recebidos do banco:", data);
             
             if (!data) {
                 return res.json({ faturamento: 0, qtd_pedidos: 0 });
             }
 
-            // Garante que os números vão para o frontend como números reais, não textos
+            
             res.json({
                 faturamento: Number(data.faturamento) || 0,
                 qtd_pedidos: Number(data.qtd_pedidos) || 0

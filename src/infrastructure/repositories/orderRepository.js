@@ -1,7 +1,6 @@
 const { pool } = require('../../config/db');
 
 const orderRepository = {
-    // 1. Criar pedido (já está funcionando perfeito)[cite: 17]
     createOrder: async (usuario_id, unidade_id, total, itens) => {
         const conn = await pool.getConnection();
         try {
@@ -45,10 +44,8 @@ const orderRepository = {
         }
     },
 
-    // 2. Buscar todas as vendas para o Histórico[cite: 17]
    findAll: async () => {
     try {
-        // Tente selecionar tudo. Se o erro persistir, o problema pode ser o nome 'created_at'
         const [rows] = await pool.query('SELECT * FROM pedidos ORDER BY id DESC'); 
         return rows;
     } catch (error) {
@@ -56,7 +53,6 @@ const orderRepository = {
         throw error;
     }
 },
-    // 3. Buscar itens de um pedido específico (Modal de Detalhes)[cite: 17]
     findById: async (id) => {
         const sql = `
             SELECT 

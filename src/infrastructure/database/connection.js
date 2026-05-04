@@ -10,7 +10,6 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
-// A mágica acontece aqui: .promise() permite usar async/await
 const connection = pool.promise();
 
 module.exports = connection;

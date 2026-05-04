@@ -1,4 +1,4 @@
-// Ajustado para o padrão do seu projeto (infrastructure)
+
 const productRepository = require('../../infrastructure/repositories/productRepository');
 
 const productController = {

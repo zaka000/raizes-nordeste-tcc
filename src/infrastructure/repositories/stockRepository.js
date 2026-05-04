@@ -1,7 +1,6 @@
 const { pool } = require('../../config/db');
 
 const stockRepository = {
-    // Lista o estoque total somando todas as unidades
     findAllWithNames: async () => {
         try {
             const [rows] = await pool.query(`
@@ -21,10 +20,8 @@ const stockRepository = {
         }
     },
 
-    // Adiciona ou soma estoque novo[cite: 18]
     updateStock: async (unidade_id, produto_id, quantidade) => {
         try {
-            // Log para você ver no Render o que está sendo adicionado
             console.log(`📦 [Estoque] Adicionando ${quantidade} do produto ${produto_id} na unidade ${unidade_id}`);
             
             const sql = `
