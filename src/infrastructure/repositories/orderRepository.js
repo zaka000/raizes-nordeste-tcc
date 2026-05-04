@@ -46,12 +46,16 @@ const orderRepository = {
     },
 
     // 2. Buscar todas as vendas para o Histórico[cite: 17]
-    findAll: async () => {
-        // Ordenado por data decrescente (mais novas primeiro)
-        const [rows] = await pool.query('SELECT * FROM pedidos ORDER BY created_at DESC');
+   findAll: async () => {
+    try {
+        // Tente selecionar tudo. Se o erro persistir, o problema pode ser o nome 'created_at'
+        const [rows] = await pool.query('SELECT * FROM pedidos ORDER BY id DESC'); 
         return rows;
-    },
-
+    } catch (error) {
+        console.error("Erro no SQL do findAll:", error);
+        throw error;
+    }
+},
     // 3. Buscar itens de um pedido específico (Modal de Detalhes)[cite: 17]
     findById: async (id) => {
         const sql = `

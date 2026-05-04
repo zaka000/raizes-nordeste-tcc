@@ -33,12 +33,11 @@ function showSection(section) {
     }
 }
 
-// 2. Atualiza o Dashboard - CORRIGIDO: Tentando 'reports' com S
+// 2. Atualiza os números do Dashboard
 async function atualizarDashboard() {
     try {
-        // Se o erro persistir, tente remover o 's' de reports aqui embaixo
         const response = await fetch(`${API_URL}/reports/dashboard`);
-        if (!response.ok) throw new Error("Rota não encontrada");
+        if (!response.ok) throw new Error("Erro na API");
         
         const data = await response.json();
         const fatElement = document.getElementById('faturamento');
@@ -62,23 +61,26 @@ async function atualizarDashboard() {
     }
 }
 
-// 3. Estoque
+// 3. Funções de Estoque
 async function carregarTelaEstoque() {
     try {
         const response = await fetch(`${API_URL}/stock`);
         const estoque = await response.json();
         const tbody = document.getElementById('tabela-estoque-body');
         if (!tbody) return;
+        
         tbody.innerHTML = ''; 
 
         estoque.forEach(item => {
             const corStatus = item.quantidade > 0 ? '#8ebf42' : '#ff4444';
+            const statusTexto = item.quantidade > 0 ? 'Em estoque' : 'Esgotado';
+
             tbody.innerHTML += `
                 <tr>
                     <td>${item.produto_nome}</td>
                     <td style="text-align: center; font-weight: bold; color: ${corStatus}">${item.quantidade}</td>
                     <td style="text-align: right;">R$ ${Number(item.preco).toFixed(2)}</td>
-                    <td style="text-align: center; color: ${corStatus}">${item.quantidade > 0 ? 'Em estoque' : 'Esgotado'}</td>
+                    <td style="text-align: center; color: ${corStatus}">${statusTexto}</td>
                     <td style="text-align: center;">
                         <button class="btn-secundario" onclick="abrirModalEstoque(${item.produto_id}, '${item.produto_nome}')">+ Add</button>
                     </td>
@@ -86,43 +88,37 @@ async function carregarTelaEstoque() {
             `;
         });
     } catch (error) {
-        console.error("Erro estoque:", error);
+        console.error("Erro ao carregar estoque:", error);
     }
 }
 
-// 4. Histórico de Vendas
+// 4. Histórico de Vendas (Corrigido para evitar erro de JSON)
 async function carregarHistoricoVendas() {
     try {
-        console.log("🔍 Buscando histórico em:", `${API_URL}/orders`);
         const response = await fetch(`${API_URL}/orders`);
-        
-        if (!response.ok) throw new Error("Erro ao buscar ordens");
+        if (!response.ok) throw new Error("Erro ao buscar histórico");
         
         const vendas = await response.json();
         const tbody = document.getElementById('tabela-vendas-body');
-        
         if (!tbody) return;
+        
         tbody.innerHTML = '';
 
-        if (vendas.length === 0) {
+        if (!vendas || vendas.length === 0) {
             tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Nenhuma venda encontrada.</td></tr>';
             return;
         }
 
         vendas.forEach(venda => {
-            // O segredo está aqui: tentamos ler 'created_at' ou 'data' ou 'data_pedido'
-            const dataRaw = venda.created_at || venda.data || venda.data_pedido;
-            const dataObj = new Date(dataRaw);
-            const dataFormatada = isNaN(dataObj) ? "Data Indisponível" : dataObj.toLocaleString('pt-BR');
-
-            // Garantimos que o total seja um número para o toFixed não quebrar
-            const valorTotal = Number(venda.total || 0).toFixed(2);
+            const dataBruta = venda.created_at || venda.data_pedido || venda.data || new Date();
+            const dataFormatada = new Date(dataBruta).toLocaleString('pt-BR');
+            const total = Number(venda.total || 0).toFixed(2);
 
             tbody.innerHTML += `
                 <tr>
                     <td>#${venda.id}</td>
                     <td>${dataFormatada}</td>
-                    <td style="text-align: right; font-weight: bold; color: #8ebf42;">R$ ${valorTotal}</td>
+                    <td style="text-align: right; font-weight: bold; color: #8ebf42;">R$ ${total}</td>
                     <td style="text-align: center;">
                         <button class="btn-secundario" onclick="verDetalhesVenda(${venda.id})">Ver Detalhes</button>
                     </td>
@@ -132,11 +128,49 @@ async function carregarHistoricoVendas() {
     } catch (error) {
         console.error("Erro ao carregar histórico:", error);
         const tbody = document.getElementById('tabela-vendas-body');
-        if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="color:red; text-align:center;">Erro ao carregar dados.</td></tr>';
+        if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="color:red; text-align:center;">Erro ao conectar com a API de vendas.</td></tr>';
     }
 }
 
-// 5. Funções Auxiliares de Venda e Produtos
+// 5. Detalhes da Venda (Modal)
+async function verDetalhesVenda(pedidoId) {
+    try {
+        const response = await fetch(`${API_URL}/orders/itens/${pedidoId}`);
+        if (!response.ok) throw new Error("Erro ao buscar detalhes");
+        
+        const itens = await response.json();
+        const lista = document.getElementById('lista-detalhes-itens');
+        const totalSpan = document.getElementById('detalhe-total');
+        
+        if (!lista) return;
+
+        document.getElementById('detalhe-titulo').innerText = `Pedido #${pedidoId}`;
+        lista.innerHTML = '';
+        let somaTotal = 0;
+
+        itens.forEach(item => {
+            const nome = item.produto_nome || "Produto";
+            const subtotal = item.quantidade * item.preco_unitario;
+            somaTotal += subtotal;
+            
+            lista.innerHTML += `
+                <li style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span><strong>${nome}</strong> (x${item.quantidade})</span>
+                    <span>R$ ${subtotal.toFixed(2)}</span>
+                </li>
+            `;
+        });
+
+        if (totalSpan) totalSpan.innerText = `R$ ${somaTotal.toFixed(2)}`;
+        document.getElementById('modal-detalhes').style.display = 'flex';
+    } catch (error) {
+        console.error("Erro detalhes:", error);
+    }
+}
+
+function fecharModalDetalhes() { document.getElementById('modal-detalhes').style.display = 'none'; }
+
+// 6. Funções de Venda e Carrinho
 async function carregarProdutosNoSelect() {
     try {
         const response = await fetch(`${API_URL}/products`);
@@ -148,7 +182,7 @@ async function carregarProdutosNoSelect() {
             ).join('');
         }
     } catch (error) {
-        console.error("Erro produtos:", error);
+        console.error("Erro select:", error);
     }
 }
 
@@ -156,10 +190,13 @@ function adicionarAoCarrinho() {
     const select = document.getElementById('select-produto');
     const qtd = parseInt(document.getElementById('qtd-produto').value);
     const selectedOption = select.options[select.selectedIndex];
-    if (!selectedOption) return;
+    if (!selectedOption || isNaN(qtd) || qtd <= 0) return alert("Selecione um produto e quantidade válida!");
+    
     const nome = selectedOption.text.split(' - ')[0];
     const preco = parseFloat(selectedOption.getAttribute('data-preco'));
-    carrinho.push({ produto_id: parseInt(select.value), nome, qtd, preco_unitario: preco });
+    const produto_id = parseInt(select.value);
+    
+    carrinho.push({ produto_id, nome, qtd, preco_unitario: preco });
     renderizarCarrinho();
 }
 
@@ -167,11 +204,16 @@ function renderizarCarrinho() {
     const lista = document.getElementById('lista-carrinho');
     const totalSpan = document.getElementById('total-venda');
     if (!lista) return;
+    
     lista.innerHTML = carrinho.map((item, index) => `
-        <li>${item.qtd}x ${item.nome} <button onclick="removerDoCarrinho(${index})">x</button></li>
+        <li style="display:flex; justify-content:space-between; padding:5px 0;">
+            <span>${item.qtd}x ${item.nome}</span>
+            <button onclick="removerDoCarrinho(${index})" style="background:none; border:none; color:red; cursor:pointer;">X</button>
+        </li>
     `).join('');
+
     const total = carrinho.reduce((sum, item) => sum + (item.preco_unitario * item.qtd), 0);
-    totalSpan.innerText = total.toFixed(2);
+    if (totalSpan) totalSpan.innerText = total.toFixed(2);
 }
 
 function removerDoCarrinho(index) {
@@ -180,25 +222,21 @@ function removerDoCarrinho(index) {
 }
 
 async function finalizarVendaCompleta() {
-    if (carrinho.length === 0) return alert("Adicione itens ao carrinho primeiro!");
+    if (carrinho.length === 0) return alert("Carrinho vazio!");
     
-    // Pegamos o valor total do span e garantimos que é um número
     const totalTexto = document.getElementById('total-venda').innerText;
     const totalLimpo = parseFloat(totalTexto);
 
-    // Montando o objeto exatamente como seu orderRepository/Controller espera
     const dadosPedido = {
-        usuario_id: 1, // ID padrão para teste
-        unidade_id: 1, // ID padrão conforme seu log do Render
+        usuario_id: 1, 
+        unidade_id: 1,
         total: totalLimpo,
         itens: carrinho.map(item => ({
-            produto_id: parseInt(item.produto_id),
-            quantidade: parseInt(item.qtd),
-            preco_unitario: parseFloat(item.preco_unitario)
+            produto_id: item.produto_id,
+            quantidade: item.qtd,
+            preco_unitario: item.preco_unitario
         }))
     };
-
-    console.log("📤 Enviando pedido:", dadosPedido); 
 
     try {
         const response = await fetch(`${API_URL}/orders`, {
@@ -211,16 +249,42 @@ async function finalizarVendaCompleta() {
             alert("Venda Realizada com Sucesso! 🌵");
             carrinho = [];
             renderizarCarrinho();
-            showSection('dash'); // Volta para o dashboard atualizado
+            showSection('dash');
         } else {
             const erro = await response.json();
-            alert("Erro na venda: " + (erro.message || "Verifique o estoque."));
+            alert("Erro: " + (erro.message || "Tente novamente."));
         }
     } catch (error) {
-        console.error("Erro ao finalizar venda:", error);
-        alert("Erro de conexão com o servidor.");
+        console.error("Erro finalização:", error);
     }
 }
 
-// Inicialização
+// 7. Modais de Estoque
+function abrirModalEstoque(id, nome) {
+    document.getElementById('add-estoque-id').value = id;
+    document.getElementById('modal-estoque-titulo').innerText = `Abastecer: ${nome}`;
+    document.getElementById('modal-estoque').style.display = 'flex';
+}
+
+function fecharModalEstoque() { document.getElementById('modal-estoque').style.display = 'none'; }
+
+async function processarEntradaEstoque() {
+    const produto_id = document.getElementById('add-estoque-id').value;
+    const quantidade = document.getElementById('add-estoque-qtd').value;
+
+    try {
+        const response = await fetch(`${API_URL}/stock/add`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ unidade_id: 1, produto_id: parseInt(produto_id), quantidade: parseInt(quantidade) })
+        });
+        if (response.ok) {
+            fecharModalEstoque();
+            await carregarTelaEstoque();
+        }
+    } catch (error) {
+        console.error("Erro estoque:", error);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => { showSection('dash'); });
