@@ -161,27 +161,45 @@ function removerDoCarrinho(index) {
 }
 
 async function finalizarVendaCompleta() {
-    if (carrinho.length === 0) return alert("Carrinho vazio!");
+    if (carrinho.length === 0) return alert("Adicione itens ao carrinho primeiro!");
+    
+    // Pegamos o valor total do span e garantimos que é um número
+    const totalTexto = document.getElementById('total-venda').innerText;
+    const totalLimpo = parseFloat(totalTexto);
+
+    // Montando o objeto exatamente como seu orderRepository/Controller espera
     const dadosPedido = {
-        usuario_id: 1, 
-        unidade_id: 1,
-        total: parseFloat(document.getElementById('total-venda').innerText),
-        itens: carrinho
+        usuario_id: 1, // ID padrão para teste
+        unidade_id: 1, // ID padrão conforme seu log do Render
+        total: totalLimpo,
+        itens: carrinho.map(item => ({
+            produto_id: parseInt(item.produto_id),
+            quantidade: parseInt(item.qtd),
+            preco_unitario: parseFloat(item.preco_unitario)
+        }))
     };
+
+    console.log("📤 Enviando pedido:", dadosPedido); 
+
     try {
         const response = await fetch(`${API_URL}/orders`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dadosPedido)
         });
+
         if (response.ok) {
-            alert("Venda Realizada! 🌵");
+            alert("Venda Realizada com Sucesso! 🌵");
             carrinho = [];
             renderizarCarrinho();
-            showSection('dash');
+            showSection('dash'); // Volta para o dashboard atualizado
+        } else {
+            const erro = await response.json();
+            alert("Erro na venda: " + (erro.message || "Verifique o estoque."));
         }
     } catch (error) {
-        console.error("Erro na venda:", error);
+        console.error("Erro ao finalizar venda:", error);
+        alert("Erro de conexão com o servidor.");
     }
 }
 
