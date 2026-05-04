@@ -6,6 +6,7 @@
     --primary-green: #8ebf42;
     --accent-wood: #3d2b1f;
     --text-white: #e0e0e0;
+    --danger-red: #ff4444;
 }
 
 body {
@@ -62,6 +63,10 @@ header {
     margin-bottom: 40px;
 }
 
+.status {
+    color: var(--primary-green);
+}
+
 /* 4. Dashboard Cards */
 .cards-container { display: flex; gap: 20px; flex-wrap: wrap; }
 
@@ -79,25 +84,41 @@ header {
 .card h3 { font-size: 0.9rem; color: #888; margin-bottom: 10px; text-transform: uppercase; }
 .card p { font-size: 2.2rem; font-weight: bold; color: var(--primary-green); margin: 0; }
 
-/* 5. Seção de Vendas e Formulários (Versão Expandida) */
-#section-vendas, #section-estoque {
+/* 5. Seções e Tabelas */
+#section-vendas, #section-estoque, #section-relatorios, .form-container {
     background: var(--card-bg);
     padding: 30px;
     border-radius: 15px;
     border-left: 5px solid var(--primary-green);
     box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    margin-bottom: 20px;
 }
 
-/* Grid para Venda Completa */
 .venda-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 30px;
 }
 
-h3 { margin-top: 0; color: var(--primary-green); }
+.tabela-vendas {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
 
-/* Inputs, Selects e Labels */
+.tabela-vendas thead tr {
+    border-bottom: 2px solid var(--primary-green);
+}
+
+.tabela-vendas th, .tabela-vendas td {
+    padding: 10px;
+}
+
+.txt-left { text-align: left; }
+.txt-center { text-align: center; }
+.txt-right { text-align: right; }
+
+/* 6. Inputs e Carrinho */
 label { display: block; margin-bottom: 8px; color: var(--primary-green); font-size: 0.9rem; }
 
 select, input {
@@ -111,7 +132,6 @@ select, input {
     box-sizing: border-box;
 }
 
-/* Carrinho Visual */
 .carrinho-area {
     background: #1f1f1f;
     padding: 20px;
@@ -119,21 +139,11 @@ select, input {
     border: 1px dashed #444;
 }
 
-#lista-carrinho {
-    list-style: none;
-    padding: 0;
-    max-height: 200px;
-    overflow-y: auto;
+.total-venda-label {
+    font-size: 1.2rem;
 }
 
-#lista-carrinho li {
-    padding: 10px;
-    border-bottom: 1px solid #333;
-    display: flex;
-    justify-content: space-between;
-}
-
-/* Botões */
+/* 7. Botões */
 .btn-salvar {
     width: 100%;
     padding: 15px;
@@ -159,4 +169,48 @@ select, input {
     margin-bottom: 10px;
 }
 
-/* 6. T
+.btn-cancelar {
+    border-color: var(--danger-red) !important;
+    color: var(--danger-red) !important;
+}
+
+/* 8. Modais */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    max-width: 400px;
+    width: 90%;
+    background: var(--card-bg);
+    padding: 30px;
+    border-radius: 15px;
+    border-left: 5px solid var(--primary-green);
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.modal-flex { display: flex; gap: 10px; margin-top: 20px; }
+
+/* Especial para o Modal de Detalhes */
+.detalhes-lista {
+    list-style: none;
+    padding: 0;
+    color: white;
+}
+
+.detalhes-total-linha {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    color: var(--primary-green);
+    margin-top: 15px;
+}

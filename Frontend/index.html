@@ -6,7 +6,6 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-   
 
     <div class="sidebar">
         <h2>Raízes 🌵</h2>
@@ -14,13 +13,13 @@
             <button onclick="showSection('dash')">Painel Inicial</button>
             <button onclick="showSection('vendas')">Nova Venda</button>
             <button onclick="showSection('estoque')">Gestão de Estoque</button>
-            <button onclick="showSection('relatorios')">Histórico de Vendas</button> </nav>
+            <button onclick="showSection('relatorios')">Histórico de Vendas</button>
         </nav>
     </div>
 
     <main>
         <header>
-            <h1 id="main-title">Bem-vindo,Samuel! 👋</h1>
+            <h1 id="main-title">Bem-vindo, Samuel! 👋</h1>
             <div id="status-server" class="status">● API Online</div>
         </header>
 
@@ -53,7 +52,7 @@
                 <div class="carrinho-area">
                     <h3>Itens no Pedido</h3>
                     <ul id="lista-carrinho"></ul>
-                    <p style="font-size: 1.2rem;"><strong>Total: R$ <span id="total-venda">0.00</span></strong></p>
+                    <p class="total-venda-label"><strong>Total: R$ <span id="total-venda">0.00</span></strong></p>
                     <button class="btn-salvar" onclick="finalizarVendaCompleta()">Finalizar Pedido</button>
                 </div>
             </div>
@@ -62,93 +61,92 @@
         <section id="section-estoque" style="display: none;">
             <div class="form-container">
                 <h3>📦 Gestão de Estoque e Produtos</h3>
-                
                 <button class="btn-secundario" onclick="abrirModalProduto()">+ Cadastrar Novo Produto</button>
                 
-                <table style="width: 100%; margin-top: 20px; border-collapse: collapse;">
+                <table class="tabela-vendas">
                     <thead>
-                        <tr style="border-bottom: 2px solid var(--primary-green);">
-                            <th style="text-align: left; padding: 10px;">Produto</th>
-                            <th style="text-align: center; padding: 10px;">Qtd em Estoque</th>
-                            <th style="text-align: right; padding: 10px;">Preço</th>
-                            <th style="text-align: center; padding: 10px;">Status</th>
-                            <th style="text-align: center; padding: 10px;">Ações</th> </tr>
+                        <tr>
+                            <th class="txt-left">Produto</th>
+                            <th class="txt-center">Qtd em Estoque</th>
+                            <th class="txt-right">Preço</th>
+                            <th class="txt-center">Status</th>
+                            <th class="txt-center">Ações</th>
+                        </tr>
                     </thead>
-                    <tbody id="tabela-estoque-body">
-                        </tbody>
+                    <tbody id="tabela-estoque-body"></tbody>
                 </table>
             </div>
         </section>
+
         <section id="section-relatorios" style="display: none;">
             <div class="form-container">
                 <h3>📊 Histórico de Vendas Realizadas</h3>
-                <table style="width: 100%; margin-top: 20px; border-collapse: collapse;">
+                <table class="tabela-vendas">
                     <thead>
-                        <tr style="border-bottom: 2px solid var(--primary-green);">
-                            <th style="text-align: left; padding: 10px;">ID Pedido</th>
-                            <th style="text-align: left; padding: 10px;">Data/Hora</th>
-                            <th style="text-align: right; padding: 10px;">Valor Total</th>
-                            <th style="text-align: center; padding: 10px;">Ações</th>
+                        <tr>
+                            <th class="txt-left">ID Pedido</th>
+                            <th class="txt-left">Data/Hora</th>
+                            <th class="txt-right">Valor Total</th>
+                            <th class="txt-center">Ações</th>
                         </tr>
                     </thead>
-                    <tbody id="tabela-vendas-body">
-                        </tbody>
+                    <tbody id="tabela-vendas-body"></tbody>
                 </table>
             </div>
         </section>
-    
-    
     </main>
 
-    <div id="modal-produto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center;">
-        <div style="max-width:400px; margin:100px auto; background:#262626; padding:30px; border-radius:15px; border-left:5px solid #8ebf42; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
-            <h3 style="color:#8ebf42; margin-top:0;">Novo Produto Raízes 🌵</h3>
+    <!-- Modal Novo Produto -->
+    <div id="modal-produto" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Novo Produto Raízes 🌵</h3>
             
-            <label style="color:#8ebf42; display:block; margin:10px 0 5px;">Nome do Produto:</label>
-            <input type="text" id="new-nome" placeholder="Ex: Cacto Mandacaru" style="width:100%; padding:10px; background:#1a1a1a; border:1px solid #3d2b1f; color:white; border-radius:8px; box-sizing: border-box;">
+            <label>Nome do Produto:</label>
+            <input type="text" id="new-nome" placeholder="Ex: Cacto Mandacaru">
             
-            <label style="color:#8ebf42; display:block; margin:10px 0 5px;">Preço (R$):</label>
-            <input type="number" id="new-preco" step="0.01" style="width:100%; padding:10px; background:#1a1a1a; border:1px solid #3d2b1f; color:white; border-radius:8px; box-sizing: border-box;">
+            <label>Preço (R$):</label>
+            <input type="number" id="new-preco" step="0.01">
             
-            <label style="color:#8ebf42; display:block; margin:10px 0 5px;">Categoria:</label>
-            <input type="text" id="new-categoria" placeholder="Ex: Plantas" style="width:100%; padding:10px; background:#1a1a1a; border:1px solid #3d2b1f; color:white; border-radius:8px; box-sizing: border-box;">
+            <label>Categoria:</label>
+            <input type="text" id="new-categoria" placeholder="Ex: Plantas">
 
-            <div style="margin-top:20px; display:flex; gap:10px;">
-                <button class="btn-salvar" onclick="salvarNovoProduto()" style="flex:1;">Cadastrar</button>
-                <button class="btn-secundario" onclick="fecharModal()" style="flex:1; border-color:#ff4444; color:#ff4444;">Cancelar</button>
+            <div class="modal-flex">
+                <button class="btn-salvar" onclick="salvarNovoProduto()">Cadastrar</button>
+                <button class="btn-secundario btn-cancelar" onclick="fecharModal()">Cancelar</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal Entrada Estoque -->
+    <div id="modal-estoque" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modal-estoque-titulo">Entrada de Estoque</h3>
+            <input type="hidden" id="add-estoque-id">
+            
+            <label>Quantidade a Adicionar:</label>
+            <input type="number" id="add-estoque-qtd" value="1" min="1">
+
+            <div class="modal-flex">
+                <button class="btn-salvar" onclick="processarEntradaEstoque()">Confirmar</button>
+                <button class="btn-secundario btn-cancelar" onclick="fecharModalEstoque()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalhes Pedido -->
+    <div id="modal-detalhes" class="modal-overlay">
+        <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+            <h3 id="detalhe-titulo">Itens do Pedido</h3>
+            <ul id="lista-detalhes-itens" class="detalhes-lista"></ul>
+            <hr style="border:0; border-top:1px solid #333; margin:15px 0;">
+            <div class="detalhes-total-linha">
+                <span>TOTAL:</span>
+                <span id="detalhe-total">R$ 0.00</span>
+            </div>
+            <button class="btn-secundario btn-cancelar" onclick="fecharModalDetalhes()" style="width: 100%; margin-top: 20px;">Fechar</button>
         </div>
     </div>
 
     <script src="script.js"></script>
-    <div id="modal-estoque" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center;">
-    <div style="max-width:350px; margin:150px auto; background:#262626; padding:30px; border-radius:15px; border-left:5px solid #8ebf42; box-shadow: 0 0 20px rgba(0,0,0,0.5);">
-        <h3 id="modal-estoque-titulo" style="color:#8ebf42; margin-top:0;">Entrada de Estoque</h3>
-        
-        <input type="hidden" id="add-estoque-id">
-        
-        <label style="color:#8ebf42; display:block; margin:10px 0 5px;">Quantidade a Adicionar:</label>
-        <input type="number" id="add-estoque-qtd" value="1" min="1" style="width:100%; padding:10px; background:#1a1a1a; border:1px solid #3d2b1f; color:white; border-radius:8px; box-sizing: border-box;">
-
-        <div style="margin-top:20px; display:flex; gap:10px;">
-            <button class="btn-salvar" onclick="processarEntradaEstoque()" style="flex:1;">Confirmar</button>
-            <button class="btn-secundario" onclick="fecharModalEstoque()" style="flex:1; border-color:#ff4444; color:#ff4444;">Cancelar</button>
-        </div>
-    </div>
-</div>
-
-<div id="modal-detalhes" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; align-items:center; justify-content:center;">
-    <div class="form-container" style="width:400px; max-height:80vh; overflow-y:auto; border-left:5px solid #8ebf42;">
-        <h3 id="detalhe-titulo" style="color:#8ebf42; margin-top:0;">Itens do Pedido</h3>
-        <ul id="lista-detalhes-itens" style="list-style:none; padding:0; color:white;">
-            </ul>
-        <hr style="border:0; border-top:1px solid #333; margin:15px 0;">
-        <div style="display:flex; justify-content:space-between; font-weight:bold; color:#8ebf42;">
-            <span>TOTAL:</span>
-            <span id="detalhe-total">R$ 0.00</span>
-        </div>
-        <button class="btn-secundario" onclick="fecharModalDetalhes()" style="width:100%; margin-top:20px; border-color:#ff4444; color:#ff4444;">Fechar</button>
-    </div>
-</div>
 </body>
 </html>
