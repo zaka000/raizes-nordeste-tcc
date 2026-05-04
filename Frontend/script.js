@@ -96,6 +96,8 @@ async function carregarTelaEstoque() {
 async function carregarHistoricoVendas() {
     try {
         const response = await fetch(`${API_URL}/orders`);
+        if (!response.ok) throw new Error("Erro ao buscar histórico");
+        
         const vendas = await response.json();
         const tbody = document.getElementById('tabela-vendas-body');
         if (!tbody) return;
@@ -103,19 +105,22 @@ async function carregarHistoricoVendas() {
         tbody.innerHTML = '';
 
         vendas.forEach(venda => {
-            // Se o banco retornar nulo, usamos o agora, mas o ideal é vir do banco
-            const dataBanco = venda.created_at || venda.data_pedido;
             
-            // Forçamos a conversão para a data local do Brasil
-            const dataFormatada = new Date(dataBanco).toLocaleString('pt-BR', {
-                timeZone: 'America/Sao_Paulo',
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
+            const dataBruta = venda.created_at || venda.data_pedido || venda.data || venda.createdAt;
+            
+            let dataFormatada = "Data não disponível";
+
+            
+            if (dataBruta) {
+                const dataObjeto = new Date(dataBruta);
+                
+                
+                if (!isNaN(dataObjeto.getTime())) {
+                    dataFormatada = dataObjeto.toLocaleString('pt-BR', {
+                        timeZone: 'America/Sao_Paulo'
+                    });
+                }
+            }
 
             const total = Number(venda.total || 0).toFixed(2);
 
