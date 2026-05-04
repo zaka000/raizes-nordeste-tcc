@@ -37,7 +37,7 @@ function showSection(section) {
 // 2. Atualiza os números do Dashboard
 async function atualizarDashboard() {
     try {
-        const response = await fetch(`${API_URL}/report/dashboard`); // Ajustado para bater com reportRoutes[cite: 31]
+        const response = await fetch(`${API_URL}/report/dashboard`);
         if (!response.ok) throw new Error("Erro na API");
         
         const data = await response.json();
@@ -65,7 +65,7 @@ async function atualizarDashboard() {
 // 3. Funções de Estoque e Produtos
 async function carregarTelaEstoque() {
     try {
-        const response = await fetch(`${API_URL}/stock`);[cite: 32]
+        const response = await fetch(`${API_URL}/stock`);
         const estoque = await response.json();
         const tbody = document.getElementById('tabela-estoque-body');
         if (!tbody) return;
@@ -98,7 +98,7 @@ async function excluirProduto(id) {
     if (!confirm("Tem certeza que deseja excluir este produto?")) return;
 
     try {
-        const response = await fetch(`${API_URL}/products/${id}`, { method: 'DELETE' });[cite: 30]
+        const response = await fetch(`${API_URL}/products/${id}`, { method: 'DELETE' });
         if (response.ok) {
             alert("Produto removido! 🌵");
             await carregarTelaEstoque();
@@ -111,9 +111,9 @@ async function excluirProduto(id) {
 // 4. Histórico de Vendas
 async function carregarHistoricoVendas() {
     try {
-        const response = await fetch(`${API_URL}/orders`);[cite: 29]
+        const response = await fetch(`${API_URL}/orders`);
         const vendas = await response.json();
-        const tbody = document.getElementById('tabela-vendas-body');[cite: 22]
+        const tbody = document.getElementById('tabela-vendas-body');
         
         if (!tbody) return;
         tbody.innerHTML = '';
@@ -146,7 +146,7 @@ async function carregarHistoricoVendas() {
 // 5. Detalhes do Pedido (Modal)
 async function verDetalhesVenda(pedidoId) {
     try {
-        const response = await fetch(`${API_URL}/orders/itens/${pedidoId}`);[cite: 29]
+        const response = await fetch(`${API_URL}/orders/itens/${pedidoId}`);
         if (!response.ok) throw new Error("Erro ao buscar detalhes");
         
         const itens = await response.json();
@@ -195,7 +195,7 @@ async function processarEntradaEstoque() {
     const quantidade = document.getElementById('add-estoque-qtd').value;
 
     try {
-        const response = await fetch(`${API_URL}/stock/add`, {[cite: 32]
+        const response = await fetch(`${API_URL}/stock/add`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ unidade_id: 1, produto_id: parseInt(produto_id), quantidade: parseInt(quantidade) })
@@ -218,7 +218,7 @@ async function salvarNovoProduto() {
     const categoria = document.getElementById('new-categoria').value;
 
     try {
-        const response = await fetch(`${API_URL}/products`, {[cite: 30]
+        const response = await fetch(`${API_URL}/products`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nome, preco, categoria })
@@ -234,7 +234,7 @@ async function salvarNovoProduto() {
 
 async function carregarProdutosNoSelect() {
     try {
-        const response = await fetch(`${API_URL}/products`);[cite: 30]
+        const response = await fetch(`${API_URL}/products`);
         const produtos = await response.json();
         const select = document.getElementById('select-produto');
         if (select) {
@@ -300,7 +300,7 @@ async function finalizarVendaCompleta() {
     };
 
     try {
-        const response = await fetch(`${API_URL}/orders`, {[cite: 29]
+        const response = await fetch(`${API_URL}/orders`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dadosPedido)
