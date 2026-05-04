@@ -9,6 +9,7 @@ function showSection(section) {
     const relatorios = document.getElementById('section-relatorios'); 
     const title = document.getElementById('main-title');
 
+    // Esconde tudo primeiro
     if (dash) dash.style.display = 'none';
     if (vendas) vendas.style.display = 'none';
     if (estoque) estoque.style.display = 'none';
@@ -29,7 +30,7 @@ function showSection(section) {
     } else if (section === 'relatorios') {
         if (relatorios) relatorios.style.display = 'block';
         if (title) title.innerText = "Histórico de Vendas 📊";
-        carregarHistoricoVendas(); 
+        carregarHistoricoVendas(); // Chamando a função correta
     }
 }
 
@@ -116,31 +117,44 @@ async function excluirProduto(id) {
 
 // 4. Histórico de Vendas
 async function carregarHistoricoVendas() {
+    console.log("🔄 Buscando histórico...");
     try {
         const response = await fetch(`${API_URL}/orders`); 
         const vendas = await response.json();
-        const tbody = document.getElementById('tabela-vendas-body');
-        if (!tbody) return;
+        
+        // ID exato que está no seu HTML (linha 93 do arquivo 30)
+        const tbody = document.getElementById('tabela-vendas-body'); 
+        
+        if (!tbody) {
+            console.error("❌ Erro: Tabela 'tabela-vendas-body' não encontrada.");
+            return;
+        }
         
         tbody.innerHTML = '';
+
+        if (vendas.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Nenhuma venda encontrada.</td></tr>';
+            return;
+        }
+
         vendas.forEach(venda => {
-            const rawDate = venda.created_at || venda.data_pedido || new Date();
+            const rawDate = venda.created_at || venda.data_pedido;
             const dataObj = new Date(rawDate);
             const dataFormatada = isNaN(dataObj) ? "Data Indisponível" : dataObj.toLocaleString('pt-BR');
 
             tbody.innerHTML += `
                 <tr>
-                    <td>#${venda.id}</td>
-                    <td>${dataFormatada}</td>
-                    <td style="text-align: right; font-weight: bold; color: #8ebf42;">R$ ${Number(venda.total).toFixed(2)}</td>
-                    <td style="text-align: center;">
+                    <td style="padding: 10px;">#${venda.id}</td>
+                    <td style="padding: 10px;">${dataFormatada}</td>
+                    <td style="text-align: right; font-weight: bold; color: #8ebf42; padding: 10px;">R$ ${Number(venda.total).toFixed(2)}</td>
+                    <td style="text-align: center; padding: 10px;">
                         <button class="btn-secundario" onclick="verDetalhesVenda(${venda.id})">Ver Detalhes</button>
                     </td>
                 </tr>
             `;
         });
     } catch (error) {
-        console.error("Erro ao carregar histórico:", error);
+        console.error("❌ Erro ao carregar histórico:", error);
     }
 }
 
