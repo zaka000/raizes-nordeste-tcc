@@ -45,15 +45,16 @@ const orderRepository = {
     },
 
    findAll: async () => {
-    try {
-        
-        const [rows] = await pool.query('SELECT id, total, unidade_id, usuario_id, data_pedido AS created_at FROM pedidos ORDER BY id DESC'); 
-        return rows;
-    } catch (error) {
-        console.error("Erro no SQL do findAll:", error);
-        throw error;
-    }
-},
+        try {
+            
+            const [rows] = await pool.query('SELECT * FROM pedidos ORDER BY id DESC'); 
+            return rows;
+        } catch (error) {
+            console.error("Erro no SQL do findAll:", error);
+            throw error;
+        }
+    },
+
     findById: async (id) => {
         const sql = `
             SELECT 
