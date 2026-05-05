@@ -96,39 +96,30 @@ async function carregarTelaEstoque() {
 async function carregarHistoricoVendas() {
     try {
         const response = await fetch(`${API_URL}/orders`);
-        if (!response.ok) throw new Error("Erro ao buscar histórico");
-        
         const vendas = await response.json();
+        console.log("Dados recebidos do banco:", vendas); 
+
         const tbody = document.getElementById('tabela-vendas-body');
         if (!tbody) return;
-        
         tbody.innerHTML = '';
 
         vendas.forEach(venda => {
             
-            const dataBruta = venda.created_at || venda.data_pedido || venda.data || venda.createdAt;
-            
+            const dataBruta = venda.created_at || venda.data_pedido || venda.data;
             let dataFormatada = "Data não disponível";
 
-            
             if (dataBruta) {
                 const dataObjeto = new Date(dataBruta);
-                
-                
                 if (!isNaN(dataObjeto.getTime())) {
-                    dataFormatada = dataObjeto.toLocaleString('pt-BR', {
-                        timeZone: 'America/Sao_Paulo'
-                    });
+                    dataFormatada = dataObjeto.toLocaleString('pt-BR');
                 }
             }
-
-            const total = Number(venda.total || 0).toFixed(2);
 
             tbody.innerHTML += `
                 <tr>
                     <td>#${venda.id}</td>
                     <td>${dataFormatada}</td>
-                    <td style="text-align: right; font-weight: bold; color: #8ebf42;">R$ ${total}</td>
+                    <td style="text-align: right; font-weight: bold; color: #8ebf42;">R$ ${Number(venda.total).toFixed(2)}</td>
                     <td style="text-align: center;">
                         <button class="btn-secundario" onclick="verDetalhesVenda(${venda.id})">Ver Detalhes</button>
                     </td>
